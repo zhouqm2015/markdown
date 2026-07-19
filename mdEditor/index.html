@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown编辑器 - 即开即用的浏览器 Markdown 写作工具 | zybkpro</title>
+  <meta name="description" content="免费、无安装、无账号的浏览器 Markdown 编辑器。实时预览、本地自动保存、支持公式与 Mermaid，可导出 Markdown / HTML / Word / PDF / 图片，隐私数据仅保存在本地。">
+  <meta name="keywords" content="Markdown编辑器,在线Markdown,Markdown预览,Markdown导出,KaTeX公式,Mermaid图表,纯前端编辑器,离线写作,zybkpro">
+  <meta name="author" content="zybkpro">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="application-name" content="Markdown编辑器">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="canonical" href="./">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:title" content="Markdown编辑器 - 即开即用的浏览器 Markdown 写作工具">
+  <meta property="og:description" content="免费、无安装、无账号。实时预览、本地自动保存，支持公式与 Mermaid，可导出多种格式，数据只属于你。">
+  <meta property="og:site_name" content="Markdown编辑器">
+  <meta property="og:url" content="./">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Markdown编辑器 - 即开即用的浏览器 Markdown 写作工具">
+  <meta name="twitter:description" content="免费、无安装、无账号。实时预览、本地自动保存，支持公式与 Mermaid，可导出多种格式，数据只属于你。">
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Markdown编辑器",
+    "alternateName": "lengyi-markdown-editor",
+    "description": "一款在浏览器里即开即用的 Markdown 写作工具：无安装、无账号、无订阅，内容本地保存，支持实时预览与多格式导出。",
+    "applicationCategory": "BrowserApplication",
+    "operatingSystem": "Any",
+    "browserRequirements": "Requires JavaScript",
+    "inLanguage": ["zh-CN", "zh-TW", "en", "ja", "ko", "es", "fr", "de", "ru", "pt"],
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "CNY"
+    },
+    "author": {
+      "@type": "Person",
+      "name": "zybkpro"
+    },
+    "featureList": [
+      "实时 Markdown 预览",
+      "本地自动保存",
+      "暗色/亮色主题",
+      "10 种语言界面",
+      "KaTeX 数学公式",
+      "Mermaid 图表",
+      "导出 Markdown / HTML / Word / PDF / 图片"
+    ]
+  }
+  </script>
+
+  <link rel="stylesheet" href="public/markdown-editor.css">
+  <link rel="stylesheet" href="public/vendor/katex-0.16.9/katex.min.css">
+</head>
+<body data-theme="light">
+  <!-- SVG 图标精灵 -->
+  <svg class="icon-sprite" style="position:absolute;width:0;height:0;overflow:hidden;" aria-hidden="true">
+    <defs>
+      <symbol id="icon-save" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></symbol>
+      <symbol id="icon-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></symbol>
+      <symbol id="icon-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></symbol>
+      <symbol id="icon-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></symbol>
+      <symbol id="icon-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></symbol>
+      <symbol id="icon-trash" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></symbol>
+      <symbol id="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></symbol>
+      <symbol id="icon-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></symbol>
+      <symbol id="icon-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></symbol>
+      <symbol id="icon-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></symbol>
+      <symbol id="icon-undo" viewBox="0 0 24 24"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></symbol>
+      <symbol id="icon-redo" viewBox="0 0 24 24"><path d="M21 7v6h-6"></path><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13"></path></symbol>
+      <symbol id="icon-quote" viewBox="0 0 24 24"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V21c0 1 0 1 1 1z"></path><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V21c0 1 0 1 1 1z"></path></symbol>
+      <symbol id="icon-list" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></symbol>
+      <symbol id="icon-list-numbered" viewBox="0 0 24 24"><line x1="10" y1="6" x2="21" y2="6"></line><line x1="10" y1="12" x2="21" y2="12"></line><line x1="10" y1="18" x2="21" y2="18"></line><path d="M4 6h1v4"></path><path d="M4 10h2"></path><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"></path></symbol>
+      <symbol id="icon-task" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></symbol>
+      <symbol id="icon-code" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></symbol>
+      <symbol id="icon-braces" viewBox="0 0 24 24"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1"></path><path d="M16 21h1a2 2 0 0 0 2-2v-5a2 2 0 0 1 2-2 2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"></path></symbol>
+      <symbol id="icon-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></symbol>
+      <symbol id="icon-table" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="12" y1="3" x2="12" y2="21"></line></symbol>
+      <symbol id="icon-layout" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></symbol>
+      <symbol id="icon-chevron-left" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></symbol>
+      <symbol id="icon-chevron-right" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></symbol>
+      <symbol id="icon-close" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></symbol>
+      <symbol id="icon-upload-cloud" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path></symbol>
+      <symbol id="icon-chevron-down" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></symbol>
+      <symbol id="icon-mermaid" viewBox="0 0 24 24">
+        <circle cx="12" cy="5" r="3"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="10" x2="7" y2="8"></line>
+        <line x1="12" y1="10" x2="17" y2="8"></line>
+        <line x1="12" y1="12" x2="7" y2="16"></line>
+        <line x1="12" y1="12" x2="17" y2="16"></line>
+        <circle cx="7" cy="17" r="2"></circle>
+        <circle cx="17" cy="17" r="2"></circle>
+        <circle cx="7" cy="7" r="2"></circle>
+        <circle cx="17" cy="7" r="2"></circle>
+      </symbol>
+    </defs>
+  </svg>
+  <div class="app">
+    <div class="top-bar">
+      <span class="brand" data-i18n="brand">Markdown编辑器</span>
+      <input type="text" id="filename" value="未命名文档.md" data-i18n-title="filenameTitle" title="文件名">
+      <div class="spacer"></div>
+      <div class="top-actions">
+        <!-- <a href="../WeChatFormatter/" class="top-link" title="公众号排版" style="display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:6px;text-decoration:none;color:inherit;font-size:13px;border:1px solid var(--border, #e5e7eb);">公众号排版</a> -->
+        <button onclick="saveToLocal()" class="primary" data-i18n-title="save"><svg class="icon"><use href="#icon-save"></use></svg> <span data-i18n="save">保存</span></button>
+        <label for="importFile"><svg class="icon"><use href="#icon-upload"></use></svg> <span data-i18n="importBtn">导入</span></label>
+        <input type="file" id="importFile" accept=".md,.markdown,.txt" onchange="importFile(this)">
+        <div class="dropdown" id="export-dropdown">
+          <button onclick="toggleExportMenu()" data-i18n-title="exportBtn"><svg class="icon"><use href="#icon-download"></use></svg> <span data-i18n="exportBtn">导出</span></button>
+          <div class="dropdown-menu" id="export-menu">
+            <div class="dropdown-item" onclick="exportFile(); closeExportMenu();" data-i18n="exportMd">导出 Markdown (.md)</div>
+            <div class="dropdown-item" onclick="exportWord(); closeExportMenu();" data-i18n="exportWord">导出 Word (.doc)</div>
+            <div class="dropdown-item" onclick="exportPDF(); closeExportMenu();" data-i18n="exportPdf">导出 PDF (.pdf)</div>
+            <div class="dropdown-item" onclick="exportHTML(); closeExportMenu();" data-i18n="exportHtml">导出 HTML (.html)</div>
+            <div class="dropdown-item" onclick="openExportImageModal(); closeExportMenu();" data-i18n="exportImage">导出图片 (.png)</div>
+          </div>
+        </div>
+        <!-- <button onclick="openUrlModal()" data-i18n-title="urlTitle"><svg class="icon"><use href="#icon-globe"></use></svg> <span data-i18n="webToMd">网页转MD</span></button> -->
+        <button onclick="openHelp()" data-i18n-title="helpTitle"><svg class="icon"><use href="#icon-help"></use></svg> <span data-i18n="help">帮助</span></button>
+        <button onclick="clearDoc()" data-i18n-title="clear"><svg class="icon"><use href="#icon-trash"></use></svg> <span data-i18n="clear">清空</span></button>
+        <div class="dropdown" id="lang-dropdown">
+          <button onclick="toggleLangMenu()" data-i18n-title="langLabel"><svg class="icon"><use href="#icon-globe"></use></svg> <span data-i18n="langLabel">语言</span></button>
+          <div class="dropdown-menu" id="lang-menu">
+            <div class="dropdown-item" onclick="setLanguage('zh-CN'); closeLangMenu();">简体中文</div>
+            <div class="dropdown-item" onclick="setLanguage('zh-TW'); closeLangMenu();">繁體中文</div>
+            <div class="dropdown-item" onclick="setLanguage('en'); closeLangMenu();">English</div>
+            <div class="dropdown-item" onclick="setLanguage('ja'); closeLangMenu();">日本語</div>
+            <div class="dropdown-item" onclick="setLanguage('ko'); closeLangMenu();">한국어</div>
+            <div class="dropdown-item" onclick="setLanguage('es'); closeLangMenu();">Español</div>
+            <div class="dropdown-item" onclick="setLanguage('fr'); closeLangMenu();">Français</div>
+            <div class="dropdown-item" onclick="setLanguage('de'); closeLangMenu();">Deutsch</div>
+            <div class="dropdown-item" onclick="setLanguage('ru'); closeLangMenu();">Русский</div>
+            <div class="dropdown-item" onclick="setLanguage('pt'); closeLangMenu();">Português</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="editor-toolbar">
+      <div class="format-group">
+        <button onclick="undo()" data-i18n-title="undoTitle" title="撤销 Ctrl+Z"><svg class="icon"><use href="#icon-undo"></use></svg></button>
+        <button onclick="redo()" data-i18n-title="redoTitle" title="重做 Ctrl+Y / Ctrl+Shift+Z"><svg class="icon"><use href="#icon-redo"></use></svg></button>
+        <span class="divider"></span>
+        <button onclick="formatBold()" data-i18n-title="boldTitle" title="加粗 Ctrl+B"><b>B</b></button>
+        <button onclick="formatItalic()" data-i18n-title="italicTitle" title="斜体 Ctrl+I"><i>I</i></button>
+        <button onclick="formatUnderline()" data-i18n-title="underlineTitle" title="下划线 Ctrl+U"><u>U</u></button>
+        <button onclick="formatStrikethrough()" data-i18n-title="strikethroughTitle" title="删除线"><s>S</s></button>
+        <button onclick="formatSubscript()" data-i18n-title="subscriptTitle" title="下标">x₂</button>
+        <button onclick="formatSuperscript()" data-i18n-title="superscriptTitle" title="上标">x²</button>
+        <span class="divider"></span>
+        <div class="dropdown" id="heading-dropdown">
+          <button onclick="toggleHeadingMenu()" data-i18n-title="heading" title="标题">H <svg class="icon icon-sm"><use href="#icon-chevron-down"></use></svg></button>
+          <div class="dropdown-menu" id="heading-menu">
+            <div class="dropdown-item" onclick="insertHeading(1); closeHeadingMenu();" data-i18n="headingH1">H1 一级标题</div>
+            <div class="dropdown-item" onclick="insertHeading(2); closeHeadingMenu();" data-i18n="headingH2">H2 二级标题</div>
+            <div class="dropdown-item" onclick="insertHeading(3); closeHeadingMenu();" data-i18n="headingH3">H3 三级标题</div>
+            <div class="dropdown-item" onclick="insertHeading(4); closeHeadingMenu();" data-i18n="headingH4">H4 四级标题</div>
+            <div class="dropdown-item" onclick="insertHeading(5); closeHeadingMenu();" data-i18n="headingH5">H5 五级标题</div>
+            <div class="dropdown-item" onclick="insertHeading(6); closeHeadingMenu();" data-i18n="headingH6">H6 六级标题</div>
+          </div>
+        </div>
+        <span class="divider"></span>
+        <button onclick="formatQuote()" data-i18n-title="quote" title="引用"><svg class="icon"><use href="#icon-quote"></use></svg> <span data-i18n="quote">引用</span></button>
+        <button onclick="formatUnorderedList()" data-i18n-title="unordered" title="无序列表"><svg class="icon"><use href="#icon-list"></use></svg> <span data-i18n="unordered">无序</span></button>
+        <button onclick="formatOrderedList()" data-i18n-title="ordered" title="有序列表"><svg class="icon"><use href="#icon-list-numbered"></use></svg> <span data-i18n="ordered">有序</span></button>
+        <button onclick="formatTaskList()" data-i18n-title="task" title="任务列表"><svg class="icon"><use href="#icon-task"></use></svg> <span data-i18n="task">任务</span></button>
+        <span class="divider"></span>
+        <button onclick="insertCodeRow()" data-i18n-title="inlineCode" title="行内代码"><svg class="icon"><use href="#icon-code"></use></svg> <span data-i18n="inlineCode">行内代码</span></button>
+        <button onclick="insertCode()" data-i18n-title="codeBlock" title="代码块"><svg class="icon"><use href="#icon-braces"></use></svg></button>
+        <button onclick="insertLink()" data-i18n-title="link" title="插入链接 Ctrl+K"><svg class="icon"><use href="#icon-link"></use></svg> <span data-i18n="link">链接</span></button>
+        <button onclick="openImageModal()" data-i18n-title="image" title="插入图片 Ctrl+Shift+K"><svg class="icon"><use href="#icon-image"></use></svg> <span data-i18n="image">图片</span></button>
+        <div class="dropdown" id="table-dropdown">
+          <button onclick="toggleTableMenu()" data-i18n-title="table" title="插入表格"><svg class="icon"><use href="#icon-table"></use></svg> <span data-i18n="table">表格</span></button>
+          <div class="dropdown-menu table-selector-menu" id="table-menu">
+            <div class="table-grid" id="table-grid"></div>
+            <div class="table-size-label" id="table-size-label">0 行 × 0 列</div>
+          </div>
+        </div>
+        <button onclick="openFindModal()" data-i18n-title="find" title="查找替换 Ctrl+F"><svg class="icon"><use href="#icon-search"></use></svg> <span data-i18n="find">查找</span></button>
+        <button onclick="openMermaidModal()" data-i18n-title="mermaid" title="插入 Mermaid 图表"><svg class="icon"><use href="#icon-mermaid"></use></svg> <span data-i18n="mermaid">Mermaid</span></button>
+      </div>
+      <div class="editor-actions">
+        <div class="dropdown" id="view-dropdown">
+          <button onclick="toggleViewMenu()" data-i18n-title="view" title="视图布局"><svg class="icon"><use href="#icon-layout"></use></svg> <span data-i18n="view">视图</span> <svg class="icon icon-sm"><use href="#icon-chevron-down"></use></svg></button>
+          <div class="dropdown-menu" id="view-menu">
+            <div class="dropdown-item" onclick="setLayoutMode('both'); closeViewMenu();" data-i18n="viewBoth">编辑 + 预览</div>
+            <div class="dropdown-item" onclick="setLayoutMode('edit'); closeViewMenu();" data-i18n="viewEdit">仅编辑</div>
+            <div class="dropdown-item" onclick="setLayoutMode('preview'); closeViewMenu();" data-i18n="viewPreview">仅预览</div>
+            <div class="dropdown-item" onclick="togglePageFullscreen(); closeViewMenu();" data-i18n="pageFullscreen">页面全屏</div>
+            <div class="dropdown-item" onclick="toggleFullscreen(); closeViewMenu();" data-i18n="systemFullscreen">系统全屏</div>
+          </div>
+        </div>
+        <button onclick="toggleTheme()" data-i18n-title="theme" title="切换主题"><svg class="icon"><use href="#icon-sun"></use></svg> <span data-i18n="theme">主题</span></button>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="pane editor-pane">
+        <div class="pane-header">
+          <span class="pane-title" data-i18n="editorPaneTitle">编辑</span>
+          <span data-i18n="editorPaneHint">支持 Markdown 语法</span>
+          <button class="collapse-btn" id="editor-collapse-btn" onclick="togglePane('editor')" title="收起编辑区"><svg class="icon icon-sm"><use href="#icon-chevron-left"></use></svg></button>
+        </div>
+        <textarea id="editor" data-i18n-placeholder="editorPlaceholder" placeholder="开始输入 Markdown..." spellcheck="false"></textarea>
+      </div>
+      <div class="resizer" id="resizer"></div>
+      <div class="pane preview-pane">
+        <div class="pane-header">
+          <button class="collapse-btn" id="preview-collapse-btn" onclick="togglePane('preview')" title="收起预览区"><svg class="icon icon-sm"><use href="#icon-chevron-right"></use></svg></button>
+          <span class="pane-title" data-i18n="previewPaneTitle">实时预览</span>
+          <div class="preview-toggle">
+            <button class="toggle-btn active" data-mode="preview" onclick="setPreviewMode('preview')" data-i18n="previewTab">预览</button>
+            <button class="toggle-btn" data-mode="source" onclick="setPreviewMode('source')" data-i18n="sourceTab">源码</button>
+          </div>
+          <span id="word-count">0 字</span>
+        </div>
+        <div class="preview-content" id="preview"></div>
+        <textarea id="preview-source" class="preview-source" data-i18n-placeholder="previewSourcePlaceholder" placeholder="在此编辑 Markdown 源码..." spellcheck="false"></textarea>
+      </div>
+    </div>
+
+    <div class="statusbar">
+      <span id="status-left">自动保存已启用</span>
+      <span class="save-hint" id="save-hint">✓ 已保存</span>
+      <span id="status-right">Ctrl+S 保存 · Ctrl+B 加粗 · Ctrl+I 斜体 · Ctrl+U 下划线 · Ctrl+Z 撤销 · Ctrl+Y 重做</span>
+    </div>
+
+    <!-- 拖放文件提示遮罩 -->
+    <div class="drop-overlay" id="drop-overlay">
+      <div class="drop-message"><svg class="icon icon-lg"><use href="#icon-upload-cloud"></use></svg> <span data-i18n="dropMessage">释放以打开文件或插入图片</span></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- 使用帮助模态框 -->
+  <div class="modal-overlay" id="help-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3><svg class="icon icon-lg"><use href="#icon-book"></use></svg> <span data-i18n="helpTitle">使用帮助</span></h3>
+        <button onclick="closeHelp()"><svg class="icon"><use href="#icon-close"></use></svg></button>
+      </div>
+      <div class="modal-body" id="help-body">
+        <p>这是一个即开即用的浏览器 Markdown 编辑器：左侧写作，右侧实时预览。内容会自动保存在浏览器本地，下次打开自动恢复。</p>
+
+        <p><b>开始写作</b></p>
+        <ul>
+          <li>在左侧输入 Markdown，右侧同步渲染。</li>
+          <li>用工具栏按钮快速插入标题、加粗、列表、引用、代码、链接、图片、表格等。</li>
+          <li>选中文字再点格式按钮，可自动包裹或替换选区。</li>
+        </ul>
+
+        <p><b>调整视图</b></p>
+        <ul>
+          <li>拖动中间分隔线调整左右宽度；点击标题栏的折叠按钮收起或展开区域。</li>
+          <li>工具栏「视图」可切换“编辑 + 预览 / 仅编辑 / 仅预览”。</li>
+          <li>右侧顶部的「源码」标签可直接改源码，切回「预览」看效果。</li>
+        </ul>
+
+        <p><b>保存、导入与导出</b></p>
+        <ul>
+          <li>按 <code>Ctrl+S</code> 或点「保存」按钮；编辑器每 500ms 自动保存一次。</li>
+          <li>点「导入」导入本地 .md / .txt，或直接把文件拖进窗口。</li>
+          <li>点「导出」导出 Markdown、HTML、Word、PDF（打印另存为）或图片。</li>
+        </ul>
+
+        <p><b>图片与公式</b></p>
+        <ul>
+          <li>工具栏「图片」支持链接插入或本地上传；本地图片会转为 Base64 嵌入文档，方便离线使用。</li>
+          <li>支持 <code>$...$</code> 行内公式和 <code>$$...$$</code> 块级公式。</li>
+        </ul>
+
+        <p><b>网页转 Markdown</b></p>
+        <ul>
+          <li>点「网页转 MD」输入网页链接，可自动提取正文。</li>
+          <li>知乎、微信公众号等建议勾选「使用本地代理」，先运行同目录的 <code>web-to-md-proxy.py</code>。</li>
+          <li>需要登录的页面，可运行 <code>python web-to-md-proxy.py --bookmark</code> 生成书签小工具提取。</li>
+        </ul>
+
+        <p><b>常用快捷键</b>：<code>Ctrl+S</code> 保存，<code>Ctrl+Z</code> 撤销，<code>Ctrl+Y / Ctrl+Shift+Z</code> 重做，<code>Ctrl+B</code> 加粗，<code>Ctrl+I</code> 斜体，<code>Ctrl+U</code> 下划线，<code>Ctrl+K</code> 链接，<code>Ctrl+Shift+K</code> 图片，<code>Ctrl+F</code> 查找，<code>Ctrl+H</code> 替换，<code>Tab</code> 插入 4 空格缩进。</p>
+
+        
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeHelp()" class="primary" data-i18n="helpOk">知道了</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 网页转 Markdown 模态框 -->
+  <div class="modal-overlay" id="url-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3><svg class="icon icon-lg"><use href="#icon-globe"></use></svg> <span data-i18n="urlTitle">网页转 Markdown</span></h3>
+        <button onclick="closeUrlModal()"><svg class="icon"><use href="#icon-close"></use></svg></button>
+      </div>
+      <div class="modal-body">
+        <label for="url-input" data-i18n="urlLabel">网页地址</label>
+        <input type="url" id="url-input" data-i18n-placeholder="urlPlaceholder" placeholder="https://example.com/article">
+        <div style="display:flex;align-items:center;gap:8px;margin:8px 0 10px;">
+          <input type="checkbox" id="use-local-proxy" checked style="width:auto;margin:0;" onchange="toggleProxyInput()">
+          <label for="use-local-proxy" style="display:inline;margin:0;font-weight:normal;cursor:pointer;" data-i18n="useProxy">使用本地代理（推荐，可解决知乎/微信公众号）</label>
+        </div>
+        <input type="url" id="proxy-url" value="http://localhost:8765/fetch" data-i18n-placeholder="proxyPlaceholder" placeholder="本地代理地址" style="margin-bottom:10px;">
+        <p id="url-privacy-hint" class="hint" style="display:none;margin:0 0 10px;color:var(--danger);" data-i18n="urlProxyPrivacyHint">未使用本地代理时，网页地址将通过第三方服务获取，请注意隐私风险</p>
+        <button onclick="fetchUrl()" class="primary" data-i18n="fetchBtn">尝试获取</button>
+        <div id="url-status" style="margin-top:10px;font-size:13px;color:var(--text-muted);"></div>
+        <div id="manual-area" style="display:none;margin-top:14px;">
+          <label for="manual-html" data-i18n="manualLabel">网页 HTML 源码（手动粘贴）</label>
+          <textarea id="manual-html" rows="6" data-i18n-placeholder="manualPlaceholder" placeholder="在浏览器中打开目标网页 → 右键「查看网页源代码」→ 全选复制 → 粘贴到此处"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeUrlModal()" data-i18n="cancel">取消</button>
+        <button onclick="convertAndInsert()" class="primary" data-i18n="convertInsert">转换并插入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 查找与替换模态框 -->
+  <div class="modal-overlay" id="find-modal">
+    <div class="modal" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3><svg class="icon icon-lg"><use href="#icon-search"></use></svg> <span data-i18n="findTitle">查找与替换</span></h3>
+        <button onclick="closeFindModal()"><svg class="icon"><use href="#icon-close"></use></svg></button>
+      </div>
+      <div class="modal-body">
+        <label for="find-input" data-i18n="findLabel">查找</label>
+        <input type="text" id="find-input" data-i18n-placeholder="findPlaceholder" placeholder="要查找的内容">
+        <label for="replace-input" data-i18n="replaceLabel">替换为</label>
+        <input type="text" id="replace-input" data-i18n-placeholder="replacePlaceholder" placeholder="替换后的内容">
+        <div id="find-status" style="margin-top: 8px; font-size: 13px; color: var(--text-muted);"></div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeFindModal()" data-i18n="cancel">关闭</button>
+        <button onclick="replaceAll()" data-i18n="replaceAll">全部替换</button>
+        <button onclick="replaceOne()" data-i18n="replaceOne">替换</button>
+        <button onclick="findNext()" class="primary" data-i18n="findNext">查找下一个</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 导出图片模态框 -->
+  <div class="modal-overlay" id="export-image-modal">
+    <div class="modal" style="max-width: 640px;">
+      <div class="modal-header">
+        <h3><svg class="icon icon-lg"><use href="#icon-image"></use></svg> <span data-i18n="exportImageTitle">导出图片</span></h3>
+        <button onclick="closeExportImageModal()"><svg class="icon"><use href="#icon-close"></use></svg></button>
+      </div>
+      <div class="modal-body">
+        <label data-i18n="ratioLabel">分享比例</label>
+        <div class="ratio-grid">
+          <button class="ratio-btn active" data-ratio="9:16" onclick="selectImageRatio('9:16')">9:16<br><small data-i18n="ratio9_16">手机竖屏/故事</small></button>
+          <button class="ratio-btn" data-ratio="4:5" onclick="selectImageRatio('4:5')">4:5<br><small data-i18n="ratio4_5">小红书/IG</small></button>
+          <button class="ratio-btn" data-ratio="3:4" onclick="selectImageRatio('3:4')">3:4<br><small data-i18n="ratio3_4">竖图</small></button>
+          <button class="ratio-btn" data-ratio="1:1" onclick="selectImageRatio('1:1')">1:1<br><small data-i18n="ratio1_1">方形</small></button>
+          <button class="ratio-btn" data-ratio="16:9" onclick="selectImageRatio('16:9')">16:9<br><small data-i18n="ratio16_9">横图</small></button>
+        </div>
+        <div class="option-row">
+          <input type="checkbox" id="image-crop-fit" onchange="renderExportImagePreview()">
+          <label for="image-crop-fit" data-i18n="cropLabel">过长时裁剪为固定比例（默认生成长图）</label>
+        </div>
+        <label data-i18n="previewLabel">预览</label>
+        <div id="export-image-preview-wrap">
+          <img id="export-image-preview" alt="导出预览" data-i18n-alt="exportImagePreviewAlt" style="display:none;">
+        </div>
+        <p class="hint" data-i18n="exportImageHint">内容较长时将按内容高度生成长图，方便手机阅读。</p>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeExportImageModal()" data-i18n="cancel">取消</button>
+        <button onclick="renderExportImagePreview()" data-i18n="refreshPreview">刷新预览</button>
+        <button onclick="downloadExportImage()" class="primary" data-i18n="downloadPng">下载 PNG</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 插入图片模态框 -->
+  <div class="modal-overlay" id="image-modal">
+    <div class="modal" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3><svg class="icon icon-lg"><use href="#icon-image"></use></svg> <span data-i18n="imageTitle">插入图片</span></h3>
+        <button onclick="closeImageModal()"><svg class="icon"><use href="#icon-close"></use></svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="image-modal-tabs">
+          <button type="button" class="image-tab active" data-tab="url" onclick="switchImageTab('url')" data-i18n="imageTabUrl">链接</button>
+          <button type="button" class="image-tab" data-tab="upload" onclick="switchImageTab('upload')" data-i18n="imageTabUpload">本地上传</button>
+        </div>
+        <div class="image-tab-panel active" id="image-tab-url">
+          <label for="image-url-input" data-i18n="imageUrlLabel">图片链接</label>
+          <input type="url" id="image-url-input" data-i18n-placeholder="imageUrlPlaceholder" placeholder="https://example.com/image.png">
+          <label for="image-url-alt" data-i18n="imageAltLabel">描述文字</label>
+          <input type="text" id="image-url-alt" data-i18n-placeholder="imageAltPlaceholder" placeholder="图片描述">
+        </div>
+        <div class="image-tab-panel" id="image-tab-upload">
+          <div class="upload-area" id="image-upload-area">
+            <p data-i18n="uploadArea">点击选择或拖拽图片到此处</p>
+            <input type="file" id="image-file-input" accept="image/*" onchange="handleImageFileSelect(this)">
+          </div>
+          <div id="image-upload-preview" class="upload-preview"></div>
+          <label for="image-upload-alt" data-i18n="imageAltLabel">描述文字</label>
+          <input type="text" id="image-upload-alt" data-i18n-placeholder="imageAltPlaceholder" placeholder="图片描述">
+        </div>
+        <p class="hint" data-i18n="imageHint">本地图片将以 Base64 嵌入文档，文件过大可能影响性能和保存。</p>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeImageModal()" data-i18n="cancel">取消</button>
+        <button onclick="confirmImageInsert()" class="primary" data-i18n="insert">插入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 插入 Mermaid 模态框 -->
+  <div class="modal-overlay" id="mermaid-modal">
+    <div class="modal" style="max-width: 560px;">
+      <div class="modal-header">
+        <h3><svg class="icon icon-lg"><use href="#icon-mermaid"></use></svg> <span data-i18n="mermaidTitle">插入 Mermaid 图表</span></h3>
+        <button onclick="closeMermaidModal()"><svg class="icon"><use href="#icon-close"></use></svg></button>
+      </div>
+      <div class="modal-body">
+        <label for="mermaid-type" data-i18n="mermaidTypeLabel">图表类型</label>
+        <select id="mermaid-type" onchange="updateMermaidTemplate()">
+          <option value="mindmap" data-i18n="mermaidTypeMindmap">思维导图</option>
+          <option value="flowchart" data-i18n="mermaidTypeFlowchart">流程图</option>
+        </select>
+        <label for="mermaid-code" data-i18n="mermaidCodeLabel">Mermaid 源码</label>
+        <textarea id="mermaid-code" rows="10" data-i18n-placeholder="mermaidCodePlaceholder" placeholder="mindmap\n  root((主题))\n    子主题 A\n    子主题 B"></textarea>
+        <p class="hint" data-i18n="mermaidHint">支持 Mermaid 语法，插入后将在预览区自动渲染。</p>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeMermaidModal()" data-i18n="cancel">取消</button>
+        <button onclick="confirmMermaidInsert()" class="primary" data-i18n="insert">插入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 依赖已 vendor 至 public/vendor/，可完全离线使用 -->
+  <script src="public/vendor/marked-12.0.2/marked.min.js"></script>
+  <script src="public/vendor/dompurify-3.2.4/purify.min.js"></script>
+  <script src="public/vendor/katex-0.16.9/katex.min.js"></script>
+  <script src="public/vendor/katex-0.16.9/contrib/auto-render.min.js"></script>
+  <script src="i18n.js"></script>
+  <script src="public/markdown-editor.js"></script>
+
+  <!-- 导出图片隐藏舞台 -->
+  <div id="export-image-stage" class="export-image-stage" aria-hidden="true">
+    <div id="export-image-content"></div>
+  </div>
+</body>
+</html>

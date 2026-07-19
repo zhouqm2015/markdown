@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WeChatFormatter - 微信公众号 Markdown 排版工具 | 一键复制到公众号</title>
+  <meta name="description" content="免费的微信公众号 Markdown 排版工具。本地一键排版、多主题样式、代码高亮，复制后可直接粘贴到公众号编辑器。数据仅保存在本地，支持离线使用。" />
+  <meta name="keywords" content="微信公众号排版,公众号Markdown,Markdown转公众号,公众号编辑器,微信排版工具,WeChatFormatter,复制到公众号,公众号主题,zybkpro" />
+  <meta name="author" content="zybkpro" />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#00B4D8" />
+  <meta name="application-name" content="WeChatFormatter" />
+  <meta name="format-detection" content="telephone=no" />
+  <link rel="canonical" href="./" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta property="og:title" content="WeChatFormatter - 微信公众号 Markdown 排版工具" />
+  <meta property="og:description" content="本地 Markdown 转公众号排版：一键排版、多主题、代码高亮，复制即可粘贴到公众号后台。" />
+  <meta property="og:site_name" content="WeChatFormatter" />
+  <meta property="og:url" content="./" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="WeChatFormatter - 微信公众号 Markdown 排版工具" />
+  <meta name="twitter:description" content="本地 Markdown 转公众号排版：一键排版、多主题、代码高亮，复制即可粘贴到公众号后台。" />
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "WeChatFormatter",
+    "alternateName": "微信公众号排版工具",
+    "description": "纯前端 Markdown 转微信公众号文章排版工具：本地一键排版、多主题样式、复制到公众号编辑器，数据仅保存在本地。",
+    "applicationCategory": "BrowserApplication",
+    "operatingSystem": "Any",
+    "browserRequirements": "Requires JavaScript",
+    "inLanguage": "zh-CN",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "CNY"
+    },
+    "featureList": [
+      "Markdown 一键排版",
+      "多主题样式",
+      "复制到公众号",
+      "代码高亮",
+      "本地草稿保存",
+      "离线可用"
+    ],
+    "author": {
+      "@type": "Person",
+      "name": "zybkpro"
+    }
+  }
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { }
+    window.GS_CONFIG = {
+      footer: {
+        text: 'zybkpro · 本地 Markdown 转公众号排版工具',
+        creator: { label: '创作者', url: '', name: 'zybkpro' },
+        license: { label: '', url: '', name: '' }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #eef0f4;
+      --surface: #ffffff;
+      --surface-2: #f7f8fa;
+      --surface-hover: #f0f2f5;
+      --border: rgba(15, 23, 42, 0.08);
+      --border-strong: rgba(15, 23, 42, 0.12);
+      --text: #1e293b;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-soft: rgba(37, 99, 235, 0.08);
+      --accent: #07c160;
+      --accent-soft: rgba(7, 193, 96, 0.1);
+      --ai: #7c3aed;
+      --ai-soft: rgba(124, 58, 237, 0.1);
+      --danger: #ef4444;
+      --radius: 10px;
+      --radius-sm: 7px;
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    .dark {
+      --bg: #0f1117;
+      --surface: #171923;
+      --surface-2: #1e2130;
+      --surface-hover: #252836;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.14);
+      --text: #e8eaf0;
+      --text-secondary: #a0a8b8;
+      --text-muted: #6b7280;
+      --primary: #60a5fa;
+      --primary-hover: #93c5fd;
+      --primary-soft: rgba(96, 165, 250, 0.12);
+      --accent-soft: rgba(7, 193, 96, 0.15);
+      --ai-soft: rgba(124, 58, 237, 0.15);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ===== 行号 ===== */
+    .gs-editor-wrap { position: relative; display: flex; flex: 1; overflow: hidden; }
+    .gs-line-nums {
+      width: 44px; flex-shrink: 0; overflow: hidden; position: relative;
+      background: var(--surface); border-right: 1px solid var(--border); padding-top: 12px;
+      font-family: 'JetBrains Mono', 'Consolas', monospace; font-size: 13px; line-height: 1.7;
+      text-align: right; color: var(--text-muted); user-select: none;
+    }
+    .gs-line-nums span { display: block; padding: 0 8px 0 0; }
+    .dark .gs-line-nums { background: var(--surface); }
+
+    .gs-draft-item:hover { background: var(--surface-hover); }
+    .gs-draft-item:last-child { border-bottom: none !important; }
+    .gs-kbd { font-family: inherit; }
+
+    body {
+      font-family: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      padding: 12px;
+      -webkit-font-smoothing: antialiased;
+    }
+    .dark body, body.dark { background: #0a0b10; }
+
+    .gs-app {
+      max-width: 1680px;
+      margin: 0 auto;
+      height: calc(100vh - 24px);
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* ===== Header ===== */
+    .gs-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 18px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .gs-header h1 {
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: -0.02em;
+    }
+    .gs-header h1 .gs-brand {
+      color: var(--text);
+      font-weight: 700;
+      font-size: 16px;
+    }
+    .gs-header h1 .gs-sub {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+    }
+
+    .gs-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    #gs-mode-badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+      border: 1px solid transparent;
+    }
+    #gs-mode-badge.gs-badge-local {
+      background: var(--accent-soft);
+      color: #059669;
+      border-color: rgba(7, 193, 96, 0.18);
+    }
+    #gs-mode-badge.gs-badge-ai {
+      background: var(--ai-soft);
+      color: #6d28d9;
+      border-color: rgba(124, 58, 237, 0.2);
+    }
+
+    /* ===== Toolbar ===== */
+    .gs-toolbar {
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .gs-toolbar-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gs-toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .gs-toolbar-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding-right: 4px;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .gs-tb-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      height: 32px;
+      padding: 0 11px;
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      font-family: inherit;
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .gs-tb-btn:hover {
+      background: var(--surface-hover);
+      color: var(--text);
+      border-color: var(--border);
+    }
+    .gs-tb-btn:active { transform: scale(0.98); }
+    .gs-tb-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+    .gs-btn-primary {
+      background: var(--primary) !important;
+      color: #fff !important;
+      border-color: var(--primary) !important;
+      font-weight: 600;
+      padding: 0 14px;
+      box-shadow: 0 1px 2px rgba(37, 99, 235, 0.25);
+    }
+    .gs-btn-primary:hover {
+      background: var(--primary-hover) !important;
+      border-color: var(--primary-hover) !important;
+      color: #fff !important;
+    }
+
+    .gs-btn-ai {
+      background: linear-gradient(135deg, #7c3aed, #6366f1) !important;
+      color: #fff !important;
+      border-color: transparent !important;
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(124, 58, 237, 0.3);
+    }
+    .gs-btn-ai:hover {
+      filter: brightness(1.05);
+      color: #fff !important;
+    }
+
+    .gs-tb-lg {
+      width: 32px;
+      min-width: 32px;
+      height: 32px;
+      padding: 0;
+      font-size: 14px;
+    }
+
+    .gs-tb-sep {
+      width: 1px;
+      height: 16px;
+      background: var(--border-strong);
+      flex-shrink: 0;
+      margin: 0 2px;
+    }
+
+    .gs-tb-color-wrap {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+    .gs-tb-color-wrap input[type="color"] {
+      width: 22px;
+      height: 22px;
+      padding: 0;
+      border: 1px solid var(--border-strong);
+      border-radius: 5px;
+      cursor: pointer;
+      background: none;
+    }
+    .gs-toolbar select.gs-tb-btn,
+    .gs-toolbar select {
+      appearance: none;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      height: 28px;
+      padding: 0 8px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .gs-toolbar select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--primary-soft);
+    }
+    .gs-toolbar label.gs-tb-btn {
+      color: var(--text-secondary);
+      font-size: 12px;
+    }
+    .gs-toolbar label.gs-tb-btn input[type="checkbox"] {
+      accent-color: var(--primary);
+      margin-right: 4px;
+    }
+
+    .gs-main {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+      gap: 0;
+    }
+
+    .gs-panel {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .gs-panel-left {
+      border-right: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .gs-panel-header {
+      padding: 8px 16px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      background: var(--surface-2);
+    }
+    .gs-panel-header .gs-panel-hint {
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--text-muted);
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .gs-editor {
+      width: 100%;
+      border: none;
+      outline: none;
+      resize: none;
+      padding: 16px;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 14px;
+      line-height: 1.8;
+      background: var(--surface);
+      color: var(--text);
+      tab-size: 2;
+    }
+    .gs-editor::placeholder { color: var(--text-muted); }
+
+    .gs-preview-box {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      /* 科技感粒子波浪挂在这里：面板不滚动，内容滚动时背景固定 */
+      background-clip: border-box;
+    }
+    .gs-preview-box.gs-fixed-bg #gs-preview {
+      background: transparent !important;
+    }
+    .gs-preview-box.gs-fixed-bg .gs-preview-header,
+    .gs-preview-box.gs-fixed-bg .gs-search-bar {
+      background: rgba(252, 253, 255, 0.9);
+      backdrop-filter: blur(6px);
+    }
+
+    .gs-preview-header {
+      padding: 8px 16px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+      background: var(--surface-2);
+    }
+    .gs-preview-stats {
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--text-muted);
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .gs-preview-stats strong {
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    #gs-preview {
+      padding: 24px 28px;
+      font-size: 15px;
+      line-height: 1.8;
+      color: var(--text);
+      background: var(--surface);
+    }
+    /* 标题/代码块默认样式；各主题 CSS 会覆盖颜色与边框 */
+    #gs-preview h1 {
+      border-left: 4px solid var(--primary, #1A3C6D);
+      border-bottom: 1px solid var(--border, #E5E6EB);
+      padding: 4px 0 8px 12px;
+    }
+    #gs-preview h2 {
+      border-left: 3px solid var(--primary, #2B6CB0);
+      padding-left: 10px;
+    }
+    #gs-preview pre {
+      background: #F3F4F6;
+      color: #1F2937;
+      border: 1px solid #E5E7EB;
+      border-radius: 6px;
+      padding: 14px 16px;
+      margin: 16px 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: pre;
+      word-break: normal;
+      overflow-wrap: normal;
+      font-size: 13px;
+      line-height: 1.7;
+      font-family: "JetBrains Mono", "Fira Code", Consolas, Monaco, monospace;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(100, 116, 139, 0.45) transparent;
+    }
+    #gs-preview pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+      white-space: inherit;
+      word-break: normal;
+    }
+    /* 代码块自定义滚动条 3px */
+    #gs-preview pre::-webkit-scrollbar {
+      height: 3px;
+      width: 3px;
+    }
+    #gs-preview pre::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    #gs-preview pre::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.45);
+      border-radius: 3px;
+    }
+    #gs-preview pre::-webkit-scrollbar-thumb:hover {
+      background: rgba(100, 116, 139, 0.7);
+    }
+    #gs-preview:focus { outline: none; }
+    #gs-preview:empty::before {
+      content: attr(data-placeholder);
+      color: var(--text-muted);
+    }
+    .dark #gs-preview blockquote {
+      background: var(--surface-hover) !important;
+      border-left-color: var(--primary) !important;
+    }
+    .dark #gs-preview table {
+      border-color: var(--border) !important;
+    }
+    .dark #gs-preview td {
+      border-color: var(--border) !important;
+    }
+
+    /* ===== 移动端预览 ===== */
+    .gs-mobile-preview {
+      max-width: 375px;
+      margin: 0 auto;
+    }
+
+    /* ===== 全屏 ===== */
+    .gs-fullscreen {
+      position: fixed !important;
+      inset: 0 !important;
+      z-index: 9999 !important;
+      height: 100vh !important;
+      background: var(--surface) !important;
+    }
+
+    /* ===== 搜索栏 ===== */
+    .gs-search-bar {
+      padding: 8px 12px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .gs-search-bar input {
+      height: 28px;
+      padding: 0 8px;
+      font-size: 13px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg);
+      color: var(--text);
+      outline: none;
+      width: 140px;
+    }
+    .gs-search-bar input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-soft); }
+
+    /* ===== 历史面板 ===== */
+    .gs-history-panel {
+      position: absolute;
+      right: 0;
+      top: 100%;
+      width: 200px;
+      max-height: 300px;
+      overflow-y: auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      z-index: 50;
+    }
+    .gs-history-item:hover { background: var(--bg); }
+
+    /* ===== 快捷键弹窗 ===== */
+    .gs-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .gs-modal {
+      background: var(--surface);
+      border-radius: 14px;
+      padding: 24px;
+      max-width: 480px;
+      width: 90%;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-md);
+    }
+    .gs-modal h2 { font-size: 17px; font-weight: 600; margin-bottom: 16px; letter-spacing: -0.02em; }
+    .gs-modal table { width: 100%; font-size: 14px; }
+    .gs-modal td { padding: 6px 8px; }
+    .gs-modal td:first-child { font-weight: 600; color: var(--primary); width: 40%; }
+    .gs-modal kbd {
+      display: inline-block;
+      padding: 2px 6px;
+      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+    }
+    .gs-modal-help {
+      max-width: 560px;
+      max-height: min(80vh, 640px);
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      overflow: hidden;
+    }
+    .gs-modal-help-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .gs-modal-help-header h2 { margin: 0; font-size: 17px; }
+    .gs-modal-help-body {
+      padding: 16px 20px;
+      overflow-y: auto;
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text);
+    }
+    .gs-modal-help-body p { margin: 0 0 12px; color: var(--text-muted); }
+    .gs-modal-help-body p b { color: var(--text); }
+    .gs-modal-help-body ul { margin: 6px 0 14px; padding-left: 1.4em; }
+    .gs-modal-help-body li { margin: 4px 0; }
+    .gs-modal-help-body code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      padding: 1px 5px;
+      background: var(--bg);
+      border-radius: 4px;
+    }
+    .gs-modal-help-footer {
+      padding: 12px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      flex-shrink: 0;
+    }
+
+    /* ===== 通用工具 ===== */
+    .gs-hidden { display: none !important; }
+    .scrollbar-thin::-webkit-scrollbar { width: 4px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    /* 代码块内的 code 不应继承内联 code 的背景色 */
+    pre code { background: transparent !important; }
+  </style>
+</head>
+<body class="antialiased">
+
+  <div class="gs-app">
+
+  <!-- ===== 页头 ===== -->
+  <header class="gs-header">
+    <h1>
+      <a  class="gs-brand" style="text-decoration:none;color:inherit;" title="返回 Markdown 编辑器">WeChatFormatter</a>
+      <!-- <span class="gs-sub"></span> -->
+      <!-- <a href="../" class="gs-sub" style="text-decoration:none;margin-left:4px;" title="Markdown 编辑器">← Markdown  编辑器</a> -->
+    </h1>
+    <div class="gs-header-actions">
+      <span id="gs-mode-badge" class="gs-badge-local">本地排版</span>
+      <span class="gs-tb-sep"></span>
+      <button id="gs-api-config-btn" class="gs-tb-btn" title="配置 AI API Key / 模型 / 接口">API 配置</button>
+      <button id="gs-history-btn" class="gs-tb-btn gs-tb-lg" title="历史版本" style="position:relative;">&#x1F550;</button>
+      <button id="gs-theme-btn" class="gs-tb-btn gs-tb-lg" title="深色/浅色主题">&#x1F319;</button>
+      <button id="gs-fullscreen-btn" class="gs-tb-btn gs-tb-lg" title="全屏编辑">&#x26F6;</button>
+      <button id="gs-mobile-btn" class="gs-tb-btn gs-tb-lg" title="手机预览">&#x1F4F1;</button>
+      <button id="gs-export-btn" class="gs-tb-btn" title="导出 Markdown">导出</button>
+      <button id="gs-export-img-btn" class="gs-tb-btn" title="导出长图">导出图</button>
+      <button id="gs-help-btn" class="gs-tb-btn" title="使用帮助">帮助</button>
+    </div>
+  </header>
+
+  <!-- ===== 工具栏 ===== -->
+  <div class="gs-toolbar">
+    <div class="gs-toolbar-row">
+      <div class="gs-toolbar-group">
+        <span class="gs-toolbar-label">排版</span>
+        <button id="gs-format-btn" class="gs-tb-btn gs-btn-primary">一键排版</button>
+        <select id="gs-template" style="max-width:160px;" title="选择公众号主题或内置风格">
+          <option value="">样式模板</option>
+        </select>
+        <button id="gs-save-template" class="gs-tb-btn gs-tb-lg" title="保存模板">+</button>
+        <span class="gs-tb-sep"></span>
+        <button id="gs-undo-btn" class="gs-tb-btn gs-tb-lg" title="撤销">&#x21A9;</button>
+        <button id="gs-redo-btn" class="gs-tb-btn gs-tb-lg" title="重做">&#x21AA;</button>
+        <label class="gs-tb-btn" style="cursor:pointer;">
+          <input type="checkbox" id="gs-indent-check" checked /> 首行缩进
+        </label>
+        <button id="gs-copy-btn" class="gs-tb-btn" title="复制排版结果">复制</button>
+      </div>
+      <div class="gs-toolbar-group">
+        <span class="gs-toolbar-label">标题</span>
+        <div class="gs-tb-color-wrap"><span>H1</span><input type="color" id="gs-h1-color" value="#1A3C6D" /><select id="gs-h1-size" style="width:48px;"><option>20px</option><option selected>22px</option><option>24px</option><option>26px</option></select></div>
+        <div class="gs-tb-color-wrap"><span>H2</span><input type="color" id="gs-h2-color" value="#2B6CB0" /><select id="gs-h2-size" style="width:48px;"><option>16px</option><option selected>18px</option><option>20px</option><option>22px</option></select></div>
+        <div class="gs-tb-color-wrap"><span>H3</span><input type="color" id="gs-h3-color" value="#1A3C6D" /><select id="gs-h3-size" style="width:44px;"><option>14px</option><option selected>16px</option><option>18px</option></select></div>
+        <div class="gs-tb-color-wrap"><span>H4</span><input type="color" id="gs-h4-color" value="#666666" /><select id="gs-h4-size" style="width:44px;"><option>13px</option><option selected>15px</option><option>16px</option></select></div>
+        <span class="gs-tb-sep"></span>
+        <div class="gs-tb-color-wrap"><span>表头</span><input type="color" id="gs-header-bg" value="#1A3C6D" /></div>
+        <div class="gs-tb-color-wrap"><span>字体</span><select id="gs-font-select" style="width:84px;"><option value="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif">系统默认</option><option value="'Noto Serif SC','Times New Roman',serif">衬线</option><option value="'JetBrains Mono','Consolas',monospace">等宽</option><option value="'KaiTi','STKaiti',serif">楷体</option><option value="'SimSun','STSong',serif">宋体</option></select></div>
+        <div class="gs-tb-color-wrap"><span>段距</span><select id="gs-p-spacing" style="width:52px;"><option value="0.5em">0.5</option><option value="1em" selected>1</option><option value="1.5em">1.5</option><option value="2em">2</option></select></div>
+      </div>
+    </div>
+    <div class="gs-toolbar-row">
+      <div class="gs-toolbar-group">
+        <span class="gs-toolbar-label">插入</span>
+        <button id="gs-insert-image" class="gs-tb-btn">图片</button>
+        <button id="gs-insert-formula" class="gs-tb-btn">公式</button>
+        <span class="gs-tb-sep"></span>
+        <button id="gs-md-bold" class="gs-tb-btn"><b>B</b></button>
+        <button id="gs-md-italic" class="gs-tb-btn"><i>I</i></button>
+        <div class="gs-tb-color-wrap" title="文字颜色">
+          <span>色</span>
+          <input type="color" id="gs-md-color" value="#E53E3E" />
+        </div>
+        <button id="gs-md-color-btn" class="gs-tb-btn" title="为选中文字着色 {#色值}文字{/#}">着色</button>
+        <button id="gs-md-highlight" class="gs-tb-btn" title="高亮选中文字 ==文字==">高亮</button>
+        <button id="gs-md-link" class="gs-tb-btn">链接</button>
+        <button id="gs-md-quote" class="gs-tb-btn">引用</button>
+        <button id="gs-md-img" class="gs-tb-btn">图</button>
+        <button id="gs-css-btn" class="gs-tb-btn">CSS</button>
+      </div>
+      <div class="gs-toolbar-group">
+        <span class="gs-toolbar-label">文件</span>
+        <button id="gs-import-btn" class="gs-tb-btn">导入</button>
+        <label id="gs-import-label" style="display:none;"><input type="file" id="gs-file-input" accept=".md" /></label>
+        <button id="gs-toc-btn" class="gs-tb-btn">目录</button>
+        <button id="gs-draft-btn" class="gs-tb-btn">草稿</button>
+        <button id="gs-template-export-btn" class="gs-tb-btn">模板</button>
+      </div>
+      <div class="gs-toolbar-group">
+        <span class="gs-toolbar-label">导出</span>
+        <button id="gs-html-btn" class="gs-tb-btn" title="导出 HTML">HTML</button>
+        <button id="gs-html-copy-btn" class="gs-tb-btn" title="复制到公众号编辑器">复制到公众号</button>
+        <button id="gs-text-copy-btn" class="gs-tb-btn">纯文本</button>
+        <button id="gs-shortcut-settings-btn" class="gs-tb-btn">快捷键</button>
+      </div>
+      <button id="gs-ai-btn" class="gs-tb-btn gs-btn-ai" title="AI 改写/润色/翻译">AI 助手</button>
+    </div>
+  </div>
+
+  <!-- ===== 主区域 ===== -->
+  <main class="gs-main">
+
+    <!-- ===== 左栏：编辑区 ===== -->
+    <div class="gs-panel gs-panel-left">
+      <div class="gs-panel-header">
+        Markdown
+        <span class="gs-panel-hint">GFM · 粘贴图片 · 粘贴 Excel</span>
+      </div>
+      <div class="gs-editor-wrap">
+        <div id="gs-line-nums" class="gs-line-nums"></div>
+        <textarea id="gs-input" class="gs-editor flex-1 scrollbar-thin"
+          placeholder="在此粘贴或输入 Markdown...&#10;&#10;支持：标题 / 列表 / 引用 / 表格 / 代码块 / 加粗 / 斜体 / 颜色&#10;颜色写法：{#E53E3E}文字{/#} 或 {红}文字{/}&#10;高亮：==文字== · 快捷键 Ctrl+S 一键排版"></textarea>
+      </div>
+    </div>
+
+    <!-- ===== 右栏：预览区 ===== -->
+    <div class="gs-panel gs-preview-box">
+      <div class="gs-preview-header">
+        <span>预览</span>
+        <span class="gs-preview-stats">
+          字数 <strong id="gs-char-count">0</strong>
+          · 段落 <strong id="gs-para-count">0</strong>
+          · 阅读 <strong id="gs-read-time">&lt;1</strong> 分钟
+        </span>
+      </div>
+      <div id="gs-search-bar" class="gs-search-bar gs-hidden">
+        <input id="gs-search-input" type="text" placeholder="搜索..." />
+        <input id="gs-search-replace-input" type="text" placeholder="替换为..." />
+        <button id="gs-search-prev" class="gs-tb-btn" style="padding:0 7px;height:26px;font-size:12px;">&#x25B2;</button>
+        <button id="gs-search-next" class="gs-tb-btn" style="padding:0 7px;height:26px;font-size:12px;">&#x25BC;</button>
+        <button id="gs-search-replace" class="gs-tb-btn" style="padding:0 10px;height:26px;font-size:12px;">替换全部</button>
+      </div>
+      <div
+        id="gs-preview"
+        class="gs-editor scrollbar-thin flex-1 overflow-y-auto"
+        contenteditable="true"
+        data-placeholder="排版结果将在此显示，支持手动编辑..."></div>
+    </div>
+
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer id="gs-footer" style="flex-shrink:0;padding:8px 18px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text-muted);background:var(--surface-2);"></footer>
+
+  <!-- ===== 使用帮助弹窗 ===== -->
+  <div id="gs-help-modal" class="gs-modal-overlay gs-hidden">
+    <div class="gs-modal gs-modal-help">
+      <div class="gs-modal-help-header">
+        <h2>使用帮助</h2>
+        <button id="gs-help-close-x" class="gs-tb-btn gs-tb-lg" title="关闭" style="border:none;">&#x2715;</button>
+      </div>
+      <div class="gs-modal-help-body">
+        <p>这是一款纯前端的微信公众号 Markdown 排版工具：左侧写 Markdown，点「一键排版」后右侧生成可直接粘贴到公众号的样式。</p>
+
+        <p><b>开始排版</b></p>
+        <ul>
+          <li>在左侧输入或粘贴 Markdown，也可点「导入」载入 <code>.md</code> 文件，或直接拖入文件。</li>
+          <li>点击「一键排版」或按 <kbd>Ctrl+S</kbd>，将内容渲染为带内联样式的公众号 HTML。</li>
+          <li>排版后点「复制到公众号」，粘贴到公众号后台即可保留样式。</li>
+        </ul>
+
+        <p><b>样式与模板</b></p>
+        <ul>
+          <li>工具栏可调整 H1~H4 颜色/字号、表头色、字体、段间距、首行缩进。</li>
+          <li>「样式模板」提供摸鱼绿、红白、石墨极简等多套公众号主题，一键切换。</li>
+          <li>需要精细控制时可打开「CSS」自定义样式。</li>
+        </ul>
+
+        <p><b>编辑与预览</b></p>
+        <ul>
+          <li>右侧预览区可直接微调文字；支持撤销/重做（<kbd>Ctrl+Z</kbd> / <kbd>Ctrl+Y</kbd>）。</li>
+          <li>支持粘贴图片、粘贴 Excel 表格、插入公式与目录。</li>
+          <li>草稿会自动保存到浏览器本地，也可在「草稿」里管理多份内容。</li>
+        </ul>
+
+        <p><b>导出与 AI</b></p>
+        <ul>
+          <li>可导出 Markdown、HTML、长图；也可复制纯文本。</li>
+          <li>配置 DeepSeek API Key 后，可用 AI 助手做润色、扩写、缩写、翻译。</li>
+        </ul>
+
+        <p><b>常用快捷键</b>：<kbd>Ctrl+S</kbd> 一键排版，<kbd>Ctrl+F</kbd> 搜索替换，<kbd>?</kbd> 快捷键面板，<kbd>Esc</kbd> 关闭弹窗。</p>
+      </div>
+      <div class="gs-modal-help-footer">
+        <button id="gs-help-close" class="gs-tb-btn gs-btn-primary">知道了</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 快捷键弹窗 ===== -->
+  <div id="gs-shortcuts-modal" class="gs-modal-overlay gs-hidden">
+    <div class="gs-modal">
+      <h2>快捷键</h2>
+      <table>
+        <tr><td><kbd>Ctrl+S</kbd></td><td>一键排版</td></tr>
+        <tr><td><kbd>Ctrl+F</kbd></td><td>搜索 / 替换</td></tr>
+        <tr><td><kbd>Ctrl+Z</kbd></td><td>撤销（预览区）</td></tr>
+        <tr><td><kbd>Ctrl+Y</kbd></td><td>重做（预览区）</td></tr>
+        <tr><td><kbd>?</kbd></td><td>显示此面板</td></tr>
+        <tr><td><kbd>Esc</kbd></td><td>关闭面板</td></tr>
+      </table>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">更多快捷键可点击工具栏 &#x2328; 自定义</p>
+      <button onclick="document.getElementById('gs-shortcuts-modal').classList.add('gs-hidden')"
+        class="gs-tb-btn" style="margin-top:12px;">关闭</button>
+    </div>
+  </div>
+
+  <!-- ===== CSS 自定义弹窗 ===== -->
+  <div id="gs-css-modal" class="gs-modal-overlay gs-hidden">
+    <div class="gs-modal" style="max-width:600px;">
+      <h2>自定义 CSS</h2>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">写 CSS 覆盖默认排版样式，保存后下次排版自动生效</p>
+      <select id="gs-css-preset" class="gs-tb-btn" style="width:100%;margin-bottom:8px;padding:4px 8px;font-size:13px;cursor:pointer;">
+        <option value="">— 从预设模板开始 —</option>
+      </select>
+      <textarea id="gs-css-editor" class="gs-editor" style="height:200px;font-size:13px;border:1px solid var(--border);border-radius:6px;resize:vertical;font-family:'JetBrains Mono',monospace;" placeholder="在此粘贴或编辑 CSS…"></textarea>
+      <div style="display:flex;gap:8px;margin-top:12px;align-items:center;">
+        <label style="font-size:13px;display:flex;align-items:center;gap:4px;cursor:pointer;">
+          <input type="checkbox" id="gs-css-toggle" checked /> 启用
+        </label>
+        <button id="gs-css-save" class="gs-tb-btn">保存</button>
+        <button id="gs-css-reset" class="gs-tb-btn">恢复默认</button>
+        <button id="gs-css-close" class="gs-tb-btn">关闭</button>
+        <span id="gs-css-status" style="font-size:12px;color:var(--text-muted);"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 历史面板 ===== -->
+  <div id="gs-history-panel" class="gs-history-panel gs-hidden"></div>
+
+  <!-- ===== 草稿管理弹窗 ===== -->
+  <div id="gs-draft-modal" class="gs-modal-overlay gs-hidden">
+    <div class="gs-modal" style="max-width:480px;">
+      <h2>&#x1F4DD; 草稿管理</h2>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <input id="gs-draft-name" class="gs-editor" style="flex:1;height:36px;padding:0 10px;font-size:14px;border:1px solid var(--border);border-radius:6px;" placeholder="新草稿名称..." />
+        <button id="gs-draft-save" class="gs-tb-btn">保存当前</button>
+      </div>
+      <div id="gs-draft-list" style="max-height:300px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;"></div>
+      <button id="gs-draft-close" class="gs-tb-btn" style="margin-top:12px;">关闭</button>
+    </div>
+  </div>
+
+  <!-- ===== AI API 配置弹窗 ===== -->
+  <div id="gs-api-config-modal" class="gs-modal-overlay gs-hidden">
+    <div class="gs-modal" style="max-width:520px;">
+      <h2>AI API 配置</h2>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">
+        密钥仅保存在本机浏览器 localStorage，不会写入项目源码。兼容 OpenAI 格式的 Chat Completions 接口（如 DeepSeek、Agnes 等）。
+      </p>
+      <label style="display:block;font-size:13px;margin-bottom:4px;">API Key</label>
+      <input id="gs-api-key" type="password" autocomplete="off" class="gs-editor" style="width:100%;height:36px;padding:0 10px;font-size:13px;border:1px solid var(--border);border-radius:6px;margin-bottom:10px;" placeholder="sk-..." />
+      <label style="display:block;font-size:13px;margin-bottom:4px;">模型 Model</label>
+      <input id="gs-api-model" type="text" class="gs-editor" style="width:100%;height:36px;padding:0 10px;font-size:13px;border:1px solid var(--border);border-radius:6px;margin-bottom:10px;" placeholder="deepseek-chat" />
+      <label style="display:block;font-size:13px;margin-bottom:4px;">接口地址 API URL</label>
+      <input id="gs-api-url" type="url" class="gs-editor" style="width:100%;height:36px;padding:0 10px;font-size:13px;border:1px solid var(--border);border-radius:6px;margin-bottom:8px;" placeholder="https://api.deepseek.com/v1" />
+      <p style="font-size:11px;color:var(--text-muted);margin-bottom:12px;">填写到 <code>/v1</code> 即可，请求时会自动拼接 <code>/chat/completions</code>。</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <button id="gs-api-config-save" class="gs-tb-btn gs-btn-primary">保存</button>
+        <button id="gs-api-config-clear" class="gs-tb-btn">清除配置</button>
+        <button id="gs-api-config-close" class="gs-tb-btn">关闭</button>
+        <span id="gs-api-config-status" style="font-size:12px;color:var(--text-muted);"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== AI 改写弹窗 ===== -->
+  <div id="gs-ai-modal" class="gs-modal-overlay gs-hidden">
+    <div class="gs-modal" style="max-width:560px;">
+      <h2>&#x2728; AI 辅助</h2>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">选中下方文字后，选择操作类型。需先在「API 配置」中填写 Key。<button type="button" id="gs-ai-open-api-config" class="gs-tb-btn" style="margin-left:6px;padding:2px 8px;font-size:12px;">去配置</button></p>
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <select id="gs-ai-action" class="gs-tb-btn" style="flex:1;font-size:13px;cursor:pointer;">
+          <option value="polish">润色（优化表达、修正语病）</option>
+          <option value="expand">扩写（丰富内容、增加细节）</option>
+          <option value="shorten">缩写（精简提炼核心）</option>
+          <option value="translate-en">翻译为英文</option>
+          <option value="translate-ja">翻译为日文</option>
+          <option value="translate-ko">翻译为韩文</option>
+        </select>
+        <button id="gs-ai-go" class="gs-tb-btn gs-btn-ai">执行</button>
+      </div>
+      <textarea id="gs-ai-source" class="gs-editor" style="height:120px;font-size:14px;border:1px solid var(--border);border-radius:6px;resize:vertical;margin-bottom:8px;" placeholder="待处理的文字...（默认取预览区选中文字）"></textarea>
+      <textarea id="gs-ai-result" class="gs-editor" style="height:120px;font-size:14px;border:1px solid var(--border);border-radius:6px;resize:vertical;" placeholder="AI 处理结果..." readonly></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button id="gs-ai-apply" class="gs-tb-btn" title="将结果插入到编辑区">&#x21E7; 应用到编辑区</button>
+        <button id="gs-ai-close" class="gs-tb-btn">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 快捷键设置弹窗 ===== -->
+  <div id="gs-shortcut-settings-modal" class="gs-modal-overlay gs-hidden">
+    <div class="gs-modal" style="max-width:460px;">
+      <h2>&#x2328; 快捷键设置</h2>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">点击快捷键可重新录制</p>
+      <div id="gs-shortcut-list" style="max-height:360px;overflow-y:auto;"></div>
+      <button id="gs-shortcut-settings-close" class="gs-tb-btn" style="margin-top:12px;">关闭</button>
+    </div>
+  </div>
+
+  </div><!-- /.gs-app -->
+
+  <script type="module" src="./app.js?v=20260718q"></script>
+  <script src="./vendor/html2canvas.min.js"></script>
+</body>
+</html>
