@@ -14,7 +14,7 @@ A Markdown writing tool that works right out of the box in your browser.
 </div>
 
 <p align="center">
-  <img src="public/产品海报.png" width="100%" alt="Markdown Editor Main Interface" />
+  <img src="WeChatFormatter/README.assets/01.jpg" width="100%" alt="Markdown Editor Main Interface" />
 </p>
 
 ---
@@ -193,13 +193,13 @@ python web-to-md-proxy.py
 ## 🖼️ Screenshots
 
 <p align="center">
-  <img src="public/产品界面2.png" width="48%" />
-  <img src="public/产品界面3-主题切换.png" width="48%" />
+  <img src="WeChatFormatter/README.assets/03.jpg" width="48%" />
+  <img src="WeChatFormatter/README.assets/05.jpg" width="48%" />
 </p>
 
 <p align="center">
-  <img src="public/产品界面-多格式导出.png" width="48%" />
-  <img src="public/产品界面-多语言支持.png" width="48%" />
+  <img src="WeChatFormatter/README.assets/02.jpg" width="48%" />
+  <img src="WeChatFormatter/README.assets/04.jpg" width="48%" />
 </p>
 
 ---
