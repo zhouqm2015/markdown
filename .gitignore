@@ -69,3 +69,7 @@ ppt/**
 ppt/
 .canghe-skills
 .canghe-skills/**
+electron/dist/
+electron/dist/**
+electron/node_modules/
+electron/node_modules/**

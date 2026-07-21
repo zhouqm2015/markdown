@@ -48,6 +48,16 @@ npm start
 - `mdEditor/index.html`
 - `WeChatFormatter/index.html`
 
+桌面端（Electron）：
+
+```bash
+npm run start:desktop
+# 或
+cd electron && npm start
+```
+
+打包安装包：`npm run dist:desktop`（产物在 `electron/dist/`）。
+
 打包部署（编辑器）：
 
 ```bash
@@ -204,12 +214,15 @@ npm run deploy   # 可选，部署到服务器 /usr/share/nginx/html/mdEditor
 │   ├── utils/
 │   ├── vendor/
 │   └── dist/
+├── electron/                  # Electron 桌面端（打包三项目）
 ├── server.js                  # 本地统一静态服务
 ├── scripts/                   # 构建 / 部署
 ├── web-to-md-proxy.py         # 可选：网页转 Markdown 代理
 ├── README.md
 └── README.zh.md
 ```
+
+桌面端启动：`cd electron && npm install && npm start`，或在本目录执行 `npm run start:desktop`。打包：`npm run dist:desktop`。
 
 ---
 
