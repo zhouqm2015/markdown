@@ -664,7 +664,9 @@
       padding: 12px 20px;
       border-top: 1px solid var(--border);
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
       flex-shrink: 0;
     }
 
@@ -843,18 +845,20 @@
         <ul>
           <li>右侧预览区可直接微调文字；支持撤销/重做（<kbd>Ctrl+Z</kbd> / <kbd>Ctrl+Y</kbd>）。</li>
           <li>支持粘贴图片、粘贴 Excel 表格、插入公式与目录。</li>
+          <li>公式支持 <code>$...$</code> 行内与 <code>$$...$$</code> 块级（一键排版后渲染为图片）。</li>
           <li>草稿会自动保存到浏览器本地，也可在「草稿」里管理多份内容。</li>
         </ul>
 
         <p><b>导出与 AI</b></p>
         <ul>
           <li>可导出 Markdown、HTML、长图；也可复制纯文本。</li>
-          <li>配置 DeepSeek API Key 后，可用 AI 助手做润色、扩写、缩写、翻译。</li>
+          <li>配置 DeepSeek API Key 后，可用 AI 助手做润色、扩写、缩写、翻译。可点击下方「API 配置」填写或修改 Key / 模型 / 接口。</li>
         </ul>
 
         <p><b>常用快捷键</b>：<kbd>Ctrl+S</kbd> 一键排版，<kbd>Ctrl+F</kbd> 搜索替换，<kbd>?</kbd> 快捷键面板，<kbd>Esc</kbd> 关闭弹窗。</p>
       </div>
       <div class="gs-modal-help-footer">
+        <button type="button" id="gs-help-api-config" class="gs-tb-btn" title="配置 AI API Key / 模型 / 接口">API 配置</button>
         <button id="gs-help-close" class="gs-tb-btn gs-btn-primary">知道了</button>
       </div>
     </div>

@@ -22,7 +22,7 @@ const i18n = {
 <p><b>图片与公式</b></p>
 <ul>
   <li>工具栏「图片」支持链接插入或本地上传；本地图片会转为 Base64 嵌入文档，方便离线使用。</li>
-  <li>支持 <code>$...$</code> 行内公式和 <code>$$...$$</code> 块级公式。</li>
+  <li>工具栏「公式」可插入分式、根号、求和、方程组、矩阵等；也支持手写 <code>$...$</code> / <code>$$...$$</code>。</li>
 </ul>
 <p><b>网页转 Markdown</b></p>
 <ul>
@@ -190,6 +190,14 @@ const i18n = {
     mermaidHint: '支持 Mermaid 语法，插入后将在预览区自动渲染。',
     toastMermaidEmpty: '请输入 Mermaid 代码',
     toastMermaidInserted: 'Mermaid 图表已插入',
+    math: '公式',
+    mathCatBasic: '基础',
+    mathCatFrac: '分式 / 根号',
+    mathCatCalc: '求和 / 积分',
+    mathCatEq: '方程组 / 矩阵',
+    mathCatSymbol: '常用符号',
+    mathHint: '选中文字后再点符号，可填入模板占位处。',
+    toastMathInserted: '公式已插入',
     metaAuthor: '作者：{0}',
     metaPublished: '发布时间：{0}',
     toastStorageQuotaExceeded: '浏览器存储空间不足，请导出文件或减少嵌入图片',
@@ -220,7 +228,7 @@ const i18n = {
 <p><b>圖片與公式</b></p>
 <ul>
   <li>工具列「圖片」支援連結插入或本機上傳；本機圖片會轉為 Base64 嵌入文件，方便離線使用。</li>
-  <li>支援 <code>$...$</code> 行內公式和 <code>$$...$$</code> 區塊公式。</li>
+  <li>工具列「公式」可插入分式、根號、求和、方程組、矩陣等；也支援手寫 <code>$...$</code> / <code>$$...$$</code>。</li>
 </ul>
 <p><b>網頁轉 Markdown</b></p>
 <ul>
@@ -388,6 +396,14 @@ const i18n = {
     mermaidHint: '支援 Mermaid 語法，插入後將在預覽區自動渲染。',
     toastMermaidEmpty: '請輸入 Mermaid 代碼',
     toastMermaidInserted: 'Mermaid 圖表已插入',
+    math: '公式',
+    mathCatBasic: '基礎',
+    mathCatFrac: '分式 / 根號',
+    mathCatCalc: '求和 / 積分',
+    mathCatEq: '方程組 / 矩陣',
+    mathCatSymbol: '常用符號',
+    mathHint: '選取文字後再點符號，可填入模板佔位處。',
+    toastMathInserted: '公式已插入',
     metaAuthor: '作者：{0}',
     metaPublished: '發布時間：{0}',
     toastStorageQuotaExceeded: '瀏覽器儲存空間不足，請匯出檔案或減少嵌入圖片',
@@ -418,7 +434,7 @@ const i18n = {
 <p><b>Images & math</b></p>
 <ul>
   <li>The toolbar “Image” button supports URL insertion or local upload; local images are embedded as Base64 for offline use.</li>
-  <li>Supports inline <code>$...$</code> and block <code>$$...$$</code> LaTeX math.</li>
+  <li>Use the toolbar <b>Math</b> button for fractions, roots, sums, equation systems, matrices; or type <code>$...$</code> / <code>$$...$$</code>.</li>
 </ul>
 <p><b>Web to Markdown</b></p>
 <ul>
@@ -586,6 +602,14 @@ const i18n = {
     mermaidHint: 'Supports Mermaid syntax; will render automatically in the preview.',
     toastMermaidEmpty: 'Please enter Mermaid code',
     toastMermaidInserted: 'Mermaid diagram inserted',
+    math: 'Math',
+    mathCatBasic: 'Basic',
+    mathCatFrac: 'Fraction / Root',
+    mathCatCalc: 'Sum / Integral',
+    mathCatEq: 'Equations / Matrix',
+    mathCatSymbol: 'Symbols',
+    mathHint: 'Select text first to fill the template placeholder.',
+    toastMathInserted: 'Formula inserted',
     metaAuthor: 'Author: {0}',
     metaPublished: 'Published: {0}',
     toastStorageQuotaExceeded: 'Browser storage is full. Export your file or reduce embedded images.',
@@ -616,7 +640,7 @@ const i18n = {
 <p><b>画像と数式</b></p>
 <ul>
   <li>ツールバーの「画像」は URL 挿入とローカルアップロードに対応；ローカル画像は Base64 で埋め込まれ、オフラインでも使えます。</li>
-  <li><code>$...$</code> のインライン数式と <code>$$...$$</code> のブロック数式に対応。</li>
+  <li>ツールバーの「数式」から分数・根号・総和・連立・行列などを挿入できます。<code>$...$</code> / <code>$$...$$</code> の手入力も可。</li>
 </ul>
 <p><b>Web を Markdown に</b></p>
 <ul>
@@ -784,6 +808,14 @@ const i18n = {
     mermaidHint: 'Mermaid 構文に対応。挿入後、プレビューに自動でレンダリングされます。',
     toastMermaidEmpty: 'Mermaid コードを入力してください',
     toastMermaidInserted: 'Mermaid 図表を挿入しました',
+    math: '数式',
+    mathCatBasic: '基本',
+    mathCatFrac: '分数 / 根号',
+    mathCatCalc: '総和 / 積分',
+    mathCatEq: '連立 / 行列',
+    mathCatSymbol: '記号',
+    mathHint: 'テキストを選択してから記号を押すと、テンプレートに入ります。',
+    toastMathInserted: '数式を挿入しました',
     metaAuthor: '著者：{0}',
     metaPublished: '公開日：{0}',
     toastStorageQuotaExceeded: 'ブラウザの保存容量が不足しています。ファイルをエクスポートするか、埋め込み画像を減らしてください。',
@@ -814,7 +846,7 @@ const i18n = {
 <p><b>이미지와 수식</b></p>
 <ul>
   <li>도구 모음「이미지」는 링크 삽입과 로컬 업로드를 지원; 로컬 이미지는 Base64로 문서에 포함되어 오프라인에서도 사용됩니다.</li>
-  <li><code>$...$</code> 인라인 수식과 <code>$$...$$</code> 블록 수식 지원.</li>
+  <li>도구모음 「수식」으로 분수·제곱근·합·방정식·행렬 등을 삽입할 수 있습니다. <code>$...$</code> / <code>$$...$$</code> 직접 입력도 가능합니다.</li>
 </ul>
 <p><b>Web을 Markdown으로</b></p>
 <ul>
@@ -982,6 +1014,14 @@ const i18n = {
     mermaidHint: 'Mermaid 문법을 지원합니다. 삽입 후 미리보기에서 자동으로 렌더링됩니다.',
     toastMermaidEmpty: 'Mermaid 코드를 입력하세요',
     toastMermaidInserted: 'Mermaid 다이어그램이 삽입되었습니다',
+    math: '수식',
+    mathCatBasic: '기본',
+    mathCatFrac: '분수 / 제곱근',
+    mathCatCalc: '합 / 적분',
+    mathCatEq: '방정식 / 행렬',
+    mathCatSymbol: '기호',
+    mathHint: '텍스트를 선택한 뒤 기호를 누르면 템플릿에 채워집니다.',
+    toastMathInserted: '수식이 삽입되었습니다',
     metaAuthor: '작성자: {0}',
     metaPublished: '게시일: {0}',
     toastStorageQuotaExceeded: '브라우저 저장 공간이 부족합니다. 파일을보내거나 삽입 이미지를 줄이세요.',
@@ -1012,7 +1052,7 @@ const i18n = {
 <p><b>Imágenes y matemáticas</b></p>
 <ul>
   <li>El botón “Imagen” admite inserción por URL o subida local; las imágenes locales se incrustan como Base64 para uso sin conexión.</li>
-  <li>Admite matemáticas LaTeX en línea <code>$...$</code> y en bloque <code>$$...$$</code>.</li>
+  <li>Usa el botón <b>Fórmula</b> de la barra para fracciones, raíces, sumas, sistemas y matrices; o escribe <code>$...$</code> / <code>$$...$$</code>.</li>
 </ul>
 <p><b>Web a Markdown</b></p>
 <ul>
@@ -1180,6 +1220,14 @@ const i18n = {
     mermaidHint: 'Admite sintaxis Mermaid; se renderizará automáticamente en la vista previa.',
     toastMermaidEmpty: 'Introduce el código Mermaid',
     toastMermaidInserted: 'Diagrama Mermaid insertado',
+    math: 'Fórmula',
+    mathCatBasic: 'Básico',
+    mathCatFrac: 'Fracción / Raíz',
+    mathCatCalc: 'Suma / Integral',
+    mathCatEq: 'Ecuaciones / Matriz',
+    mathCatSymbol: 'Símbolos',
+    mathHint: 'Selecciona texto antes para rellenar el marcador de la plantilla.',
+    toastMathInserted: 'Fórmula insertada',
     metaAuthor: 'Autor: {0}',
     metaPublished: 'Publicado: {0}',
     toastStorageQuotaExceeded: 'El almacenamiento del navegador está lleno. Exporta el archivo o reduce las imágenes incrustadas.',
@@ -1210,7 +1258,7 @@ const i18n = {
 <p><b>Images et mathématiques</b></p>
 <ul>
   <li>Le bouton « Image » prend en charge l’insertion par URL ou le téléversement local ; les images locales sont intégrées en Base64 pour une utilisation hors ligne.</li>
-  <li>Prend en charge les mathématiques LaTeX en ligne <code>$...$</code> et en bloc <code>$$...$$</code>.</li>
+  <li>Utilisez le bouton <b>Formule</b> pour fractions, racines, sommes, systèmes et matrices ; ou saisissez <code>$...$</code> / <code>$$...$$</code>.</li>
 </ul>
 <p><b>Web vers Markdown</b></p>
 <ul>
@@ -1378,6 +1426,14 @@ const i18n = {
     mermaidHint: 'Prend en charge la syntaxe Mermaid ; sera rendu automatiquement dans l’aperçu.',
     toastMermaidEmpty: 'Veuillez saisir le code Mermaid',
     toastMermaidInserted: 'Diagramme Mermaid inséré',
+    math: 'Formule',
+    mathCatBasic: 'Base',
+    mathCatFrac: 'Fraction / Racine',
+    mathCatCalc: 'Somme / Intégrale',
+    mathCatEq: 'Équations / Matrice',
+    mathCatSymbol: 'Symboles',
+    mathHint: 'Sélectionnez du texte avant de cliquer pour remplir le modèle.',
+    toastMathInserted: 'Formule insérée',
     metaAuthor: 'Auteur : {0}',
     metaPublished: 'Publié : {0}',
     toastStorageQuotaExceeded: 'Espace de stockage du navigateur insuffisant. Exportez le fichier ou réduisez les images intégrées.',
@@ -1408,7 +1464,7 @@ const i18n = {
 <p><b>Bilder und Mathe</b></p>
 <ul>
   <li>Der „Bild“-Button unterstützt URL-Einfügung oder lokales Hochladen; lokale Bilder werden als Base64 eingebettet, um offline nutzbar zu sein.</li>
-  <li>Unterstützt LaTeX-Mathe inline <code>$...$</code> und als Block <code>$$...$$</code>.</li>
+  <li>Über die Schaltfläche <b>Formel</b> Brüche, Wurzeln, Summen, Gleichungssysteme und Matrizen einfügen; oder <code>$...$</code> / <code>$$...$$</code> tippen.</li>
 </ul>
 <p><b>Web zu Markdown</b></p>
 <ul>
@@ -1576,6 +1632,14 @@ const i18n = {
     mermaidHint: 'Unterstützt Mermaid-Syntax; wird in der Vorschau automatisch gerendert.',
     toastMermaidEmpty: 'Bitte Mermaid-Code eingeben',
     toastMermaidInserted: 'Mermaid-Diagramm eingefügt',
+    math: 'Formel',
+    mathCatBasic: 'Basis',
+    mathCatFrac: 'Bruch / Wurzel',
+    mathCatCalc: 'Summe / Integral',
+    mathCatEq: 'Gleichungen / Matrix',
+    mathCatSymbol: 'Symbole',
+    mathHint: 'Markieren Sie Text, um den Platzhalter der Vorlage zu füllen.',
+    toastMathInserted: 'Formel eingefügt',
     metaAuthor: 'Autor: {0}',
     metaPublished: 'Veröffentlicht: {0}',
     toastStorageQuotaExceeded: 'Browserspeicher voll. Datei exportieren oder eingebettete Bilder reduzieren.',
@@ -1606,7 +1670,7 @@ const i18n = {
 <p><b>Изображения и формулы</b></p>
 <ul>
   <li>Кнопка «Изображение» поддерживает вставку по ссылке или локальную загрузку; локальные изображения встраиваются как Base64 для использования офлайн.</li>
-  <li>Поддерживаются встроенные <code>$...$</code> и блочные <code>$$...$$</code> LaTeX-формулы.</li>
+  <li>Кнопка <b>Формула</b> вставляет дроби, корни, суммы, системы уравнений и матрицы; также можно писать <code>$...$</code> / <code>$$...$$</code>.</li>
 </ul>
 <p><b>Web в Markdown</b></p>
 <ul>
@@ -1774,6 +1838,14 @@ const i18n = {
     mermaidHint: 'Поддерживает синтаксис Mermaid; будет автоматически отображена в предпросмотре.',
     toastMermaidEmpty: 'Введите код Mermaid',
     toastMermaidInserted: 'Диаграмма Mermaid вставлена',
+    math: 'Формула',
+    mathCatBasic: 'Базовые',
+    mathCatFrac: 'Дробь / Корень',
+    mathCatCalc: 'Сумма / Интеграл',
+    mathCatEq: 'Уравнения / Матрица',
+    mathCatSymbol: 'Символы',
+    mathHint: 'Сначала выделите текст, чтобы заполнить шаблон.',
+    toastMathInserted: 'Формула вставлена',
     metaAuthor: 'Автор: {0}',
     metaPublished: 'Дата: {0}',
     toastStorageQuotaExceeded: 'Недостаточно места в хранилище браузера. Экспортируйте файл или уменьшите встроенные изображения.',
@@ -1804,7 +1876,7 @@ const i18n = {
 <p><b>Imagens e matemática</b></p>
 <ul>
   <li>O botão “Imagem” suporta inserção por URL ou upload local; imagens locais são incorporadas como Base64 para uso offline.</li>
-  <li>Suporta matemática LaTeX inline <code>$...$</code> e em bloco <code>$$...$$</code>.</li>
+  <li>Use o botão <b>Fórmula</b> para frações, raízes, somas, sistemas e matrizes; ou escreva <code>$...$</code> / <code>$$...$$</code>.</li>
 </ul>
 <p><b>Web para Markdown</b></p>
 <ul>
@@ -1972,6 +2044,14 @@ const i18n = {
     mermaidHint: 'Suporta sintaxe Mermaid; será renderizado automaticamente na pré-visualização.',
     toastMermaidEmpty: 'Digite o código Mermaid',
     toastMermaidInserted: 'Diagrama Mermaid inserido',
+    math: 'Fórmula',
+    mathCatBasic: 'Básico',
+    mathCatFrac: 'Fração / Raiz',
+    mathCatCalc: 'Soma / Integral',
+    mathCatEq: 'Equações / Matriz',
+    mathCatSymbol: 'Símbolos',
+    mathHint: 'Selecione o texto antes para preencher o espaço do modelo.',
+    toastMathInserted: 'Fórmula inserida',
     metaAuthor: 'Autor: {0}',
     metaPublished: 'Publicado: {0}',
     toastStorageQuotaExceeded: 'Armazenamento do navegador cheio. Exporte o arquivo ou reduza imagens incorporadas.',

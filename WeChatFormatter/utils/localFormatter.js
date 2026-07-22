@@ -98,13 +98,31 @@ function escapeHtml(text) {
 
 const IMG_STYLE = 'max-width:100%; height:auto; display:block; margin:16px auto; border-radius:4px;'
 const CODE_STYLE = 'background:#F0F1F3; color:#E53E3E; padding:1px 5px; border-radius:3px; font-size:0.9em; font-family:"JetBrains Mono","Fira Code","Consolas",monospace;'
+const MATH_INLINE_STYLE = 'display:inline-block; vertical-align:middle; margin:0 2px; max-width:100%;'
+const MATH_BLOCK_STYLE = 'display:block; margin:16px auto; max-width:100%;'
 const IMG_PH = '\u0000IMG\u0000'
 const CODE_PH = '\u0000COD\u0000'
 const LINK_PH = '\u0000LNK\u0000'
+const MATH_PH = '\u0000MATH\u0000'
 const IMG_PH_RE = /\u0000IMG\u0000/g
 const CODE_PH_RE = /\u0000COD\u0000/g
 const LINK_PH_RE = /\u0000LNK\u0000/g
+const MATH_PH_RE = /\u0000MATH\u0000/g
 const COLOR_PH_RE = /\u0000CLR(\d+)\u0000/g
+const BLOCK_MATH_RE = /\$\$([\s\S]+?)\$\$/g
+const INLINE_MATH_RE = /\$([^\$\n]+?)\$/g
+const BLOCK_MATH_LINE_RE = /^\u0000BMATH(\d+)\u0000$/
+
+/** CodeCogs SVG，便于粘贴公众号（纯前端、无需本地 KaTeX） */
+function latexToSvgUrl(latex) {
+  return `https://latex.codecogs.com/svg.image?${encodeURIComponent(latex)}`
+}
+
+function renderMathImg(latex, display) {
+  const style = display ? MATH_BLOCK_STYLE : MATH_INLINE_STYLE
+  const alt = escapeHtml(latex)
+  return `<img src="${latexToSvgUrl(latex)}" alt="${alt}" style="${style}" />`
+}
 
 const COLOR_NAME_ALT = '红|橙|黄|绿|青|蓝|紫|粉|灰|黑|白|红色|橙色|黄色|绿色|青色|蓝色|紫色|粉色|灰色|黑色|白色'
 const COLOR_OPEN_HEX_RE = /^\{#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})\}/
@@ -199,13 +217,20 @@ function extractColors(text, colors) {
 }
 
 function extractAll(text) {
-  const images = [], codes = [], links = [], colors = []
+  const images = [], codes = [], links = [], colors = [], maths = []
   // 先抽出代码，避免着色语法吃进代码
   let t = text.replace(INLINE_CODE_RE, (m, c) => { codes.push(c); return CODE_PH })
+  // 行内公式（块级 $$ 已在 formatLocally 预处理）
+  t = t.replace(INLINE_MATH_RE, (m, latex) => {
+    const trimmed = latex.trim()
+    if (!trimmed) return m
+    maths.push(trimmed)
+    return MATH_PH
+  })
   t = extractColors(t, colors)
   t = t.replace(IMG_RE, (m, alt, src) => { images.push({ alt, src }); return IMG_PH })
   t = t.replace(LINK_RE, (m, text, href) => { links.push({ text, href }); return LINK_PH })
-  return { text: t, images, codes, links, colors }
+  return { text: t, images, codes, links, colors, maths }
 }
 
 function renderColoredInner(raw) {
@@ -226,8 +251,8 @@ function renderColorEntry(c, colors) {
   return `<span style="color:${c.color};">${inner}</span>`
 }
 
-function restoreAll(text, images, codes, links, colors) {
-  let li = 0, ii = 0, ci = 0
+function restoreAll(text, images, codes, links, colors, maths = []) {
+  let li = 0, ii = 0, ci = 0, mi = 0
   const withColors = text.replace(COLOR_PH_RE, (_, idx) =>
     renderColorEntry(colors[parseInt(idx, 10)], colors)
   )
@@ -236,7 +261,8 @@ function restoreAll(text, images, codes, links, colors) {
     return `<a href="${escapeHtml(link.href)}" style="color:#2B6CB0;text-decoration:underline;">${renderEmphasis(escapeHtml(link.text))}</a>`
   })
   const withCode = withLinks.replace(CODE_PH_RE, () => `<code style="${CODE_STYLE}">${escapeHtml(codes[ci++])}</code>`)
-  return withCode.replace(IMG_PH_RE, () => {
+  const withMath = withCode.replace(MATH_PH_RE, () => renderMathImg(maths[mi++] || '', false))
+  return withMath.replace(IMG_PH_RE, () => {
     const img = images[ii++]
     let src = img.src
     const m = src.match(/^pasted:(\d+)$/)
@@ -248,11 +274,11 @@ function restoreAll(text, images, codes, links, colors) {
 }
 
 function renderInline(text) {
-  const { text: extracted, images, codes, links, colors } = extractAll(text)
+  const { text: extracted, images, codes, links, colors, maths } = extractAll(text)
   const escaped = escapeHtml(extracted)
   const emphasized = renderEmphasis(escaped)
   const striked = renderStrike(emphasized)
-  return restoreAll(striked, images, codes, links, colors)
+  return restoreAll(striked, images, codes, links, colors, maths)
 }
 
 function isTableRow(line) {
@@ -304,6 +330,7 @@ function classifyLine(line) {
   if (!trimmed) return { type: 'empty' }
 
   let m
+  if (m = trimmed.match(BLOCK_MATH_LINE_RE)) return { type: 'math', index: parseInt(m[1], 10) }
   if (HR_RE.test(trimmed)) return { type: 'hr' }
   if (m = trimmed.match(H1_RE)) return { type: 'h1', text: m[1].trim() }
   if (m = trimmed.match(H2_RE)) return { type: 'h2', text: m[1].trim() }
@@ -331,7 +358,24 @@ export function formatLocally(rawText, headerBgColor = '#1A3C6D', h1Color = '#1A
   const H3 = `font-size:${h3Size}; font-weight:600; color:${h3Color}; margin:16px 0 8px 0; line-height:1.6;`
   const H4 = `font-size:${h4Size}; font-weight:600; color:${h4Color}; margin:14px 0 6px 0; line-height:1.6;`
 
-  const lines = rawText.split('\n')
+  // 先抽出块级公式，避免被段落/代码逻辑拆坏；代码围栏内的 $$ 不处理
+  const blockMaths = []
+  const protectedSegments = []
+  let withFencesProtected = rawText.replace(/(^|\n)(```[\s\S]*?\n```)/g, (_, lead, fence) => {
+    const idx = protectedSegments.length
+    protectedSegments.push(fence)
+    return `${lead}\u0000FENCE${idx}\u0000`
+  })
+  withFencesProtected = withFencesProtected.replace(BLOCK_MATH_RE, (_, latex) => {
+    const idx = blockMaths.length
+    blockMaths.push(String(latex).trim())
+    return `\n\u0000BMATH${idx}\u0000\n`
+  })
+  const preprocessed = withFencesProtected.replace(/\u0000FENCE(\d+)\u0000/g, (_, idx) =>
+    protectedSegments[parseInt(idx, 10)] || ''
+  )
+
+  const lines = preprocessed.split('\n')
   const parts = []
   let inCodeBlock = false
   let codeBuffer = []
@@ -537,6 +581,9 @@ export function formatLocally(rawText, headerBgColor = '#1A3C6D', h1Color = '#1A
       parts.push(`<h4 style="${H4}">${leaf(renderInline(c.text))}</h4>`)
     } else if (c.type === 'bq') {
       parts.push(`<blockquote style="${BQ_STYLE}">${leaf(renderInline(c.text))}</blockquote>`)
+    } else if (c.type === 'math') {
+      const latex = blockMaths[c.index] || ''
+      parts.push(`<p style="text-align:center; margin:16px 0;">${renderMathImg(latex, true)}</p>`)
     } else if (c.type === 'img') {
       parts.push(renderInline(c.text))
     } else if (c.type === 'p') {

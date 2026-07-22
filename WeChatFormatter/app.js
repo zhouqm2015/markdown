@@ -987,7 +987,7 @@ async function applyFormat() {
 
     await updateModeBadge()
 
-    const { formatLocally } = await import('./utils/localFormatter.js')
+    const { formatLocally } = await import('./utils/localFormatter.js?v=20260722a')
     const headerBg = headerBgPicker.value || '#1A3C6D'
     const h1c = h1Color.value
     const h1s = h1Size.value
@@ -1297,14 +1297,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   })
 
-  // 插入公式
+  // 插入公式：写入左侧 Markdown，一键排版时由 localFormatter 解析为 CodeCogs SVG
   $('gs-insert-formula')?.addEventListener('click', () => {
-    const latex = prompt('输入 LaTeX 公式（不含 $$）：')
-    if (latex) {
-      saveSnapshot()
-      const url = `https://latex.codecogs.com/svg.image?${encodeURIComponent(latex)}`
-      preview.innerHTML += `<img src="${url}" style="display:inline-block;vertical-align:middle;margin:4px;max-width:100%;" />`
-    }
+    const latex = prompt('输入 LaTeX 公式（可含 \\frac、\\sqrt 等）：')
+    if (!latex || !latex.trim()) return
+    const trimmed = latex.trim()
+    const isBlock = /\n/.test(trimmed) || /\\begin\{|\\dfrac|\\sum|\\int|\\lim|\\prod/.test(trimmed) || trimmed.length > 48
+    const md = isBlock ? `\n$$\n${trimmed}\n$$\n` : `$${trimmed}$`
+    const start = input.selectionStart
+    const end = input.selectionEnd
+    input.setRangeText(md, start, end, 'end')
+    input.focus()
   })
 
   // Markdown 快捷插入
@@ -1748,6 +1751,10 @@ a { color: #5A6AAA !important; }`
   }
 
   $('gs-api-config-btn')?.addEventListener('click', () => openApiConfigModal())
+  $('gs-help-api-config')?.addEventListener('click', () => {
+    closeHelp()
+    openApiConfigModal()
+  })
   $('gs-api-config-close')?.addEventListener('click', closeApiConfigModal)
   $('gs-api-config-modal')?.addEventListener('click', e => {
     if (e.target === $('gs-api-config-modal')) closeApiConfigModal()

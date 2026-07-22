@@ -1301,6 +1301,102 @@ ${'</scr' + 'ipt>'}
       el.focus();
     }
 
+    // 数学公式插入
+    // latex 中 | 为光标位置；选区非空时优先填入 | 处
+    const MATH_TEMPLATES = {
+      inline: { latex: '|', wrap: 'inline' },
+      block: { latex: '|', wrap: 'display' },
+      sup: { latex: '^{|}', wrap: 'inline' },
+      sub: { latex: '_{|}', wrap: 'inline' },
+      frac: { latex: '\\frac{|}{}', wrap: 'inline' },
+      dfrac: { latex: '\\dfrac{|}{}', wrap: 'display' },
+      sqrt: { latex: '\\sqrt{|}', wrap: 'inline' },
+      sqrtn: { latex: '\\sqrt[n]{|}', wrap: 'inline' },
+      sum: { latex: '\\sum_{i=1}^{n} |', wrap: 'display' },
+      prod: { latex: '\\prod_{i=1}^{n} |', wrap: 'display' },
+      int: { latex: '\\int_{a}^{b} | \\, dx', wrap: 'display' },
+      iint: { latex: '\\iint_{D} | \\, dA', wrap: 'display' },
+      lim: { latex: '\\lim_{n \\to \\infty} |', wrap: 'display' },
+      partial: { latex: '\\frac{\\partial |}{\\partial x}', wrap: 'inline' },
+      cases: { latex: '\\begin{cases}\n  | \\\\\\\\\n  \n\\end{cases}', wrap: 'display' },
+      aligned: { latex: '\\begin{aligned}\n  | &= \\\\\\\\\n   &= \n\\end{aligned}', wrap: 'display' },
+      pmatrix: { latex: '\\begin{pmatrix}\n  a & b \\\\\\\\\n  c & d\n\\end{pmatrix}', wrap: 'display' },
+      bmatrix: { latex: '\\begin{bmatrix}\n  a & b \\\\\\\\\n  c & d\n\\end{bmatrix}', wrap: 'display' },
+      vmatrix: { latex: '\\begin{vmatrix}\n  a & b \\\\\\\\\n  c & d\n\\end{vmatrix}', wrap: 'display' },
+      pm: { latex: '\\pm', wrap: 'inline' },
+      times: { latex: '\\times', wrap: 'inline' },
+      div: { latex: '\\div', wrap: 'inline' },
+      cdot: { latex: '\\cdot', wrap: 'inline' },
+      neq: { latex: '\\neq', wrap: 'inline' },
+      leq: { latex: '\\leq', wrap: 'inline' },
+      geq: { latex: '\\geq', wrap: 'inline' },
+      approx: { latex: '\\approx', wrap: 'inline' },
+      infty: { latex: '\\infty', wrap: 'inline' },
+      rightarrow: { latex: '\\rightarrow', wrap: 'inline' },
+      alpha: { latex: '\\alpha', wrap: 'inline' },
+      beta: { latex: '\\beta', wrap: 'inline' },
+      theta: { latex: '\\theta', wrap: 'inline' },
+      pi: { latex: '\\pi', wrap: 'inline' },
+      delta: { latex: '\\Delta', wrap: 'inline' },
+      omega: { latex: '\\omega', wrap: 'inline' }
+    };
+
+    function toggleMathMenu() {
+      document.getElementById('math-menu').classList.toggle('show');
+    }
+
+    function closeMathMenu() {
+      document.getElementById('math-menu')?.classList.remove('show');
+    }
+
+    function insertMath(id) {
+      const tpl = MATH_TEMPLATES[id];
+      if (!tpl) return;
+      pushHistory();
+      const el = getActiveEditor();
+      const start = el.selectionStart;
+      const end = el.selectionEnd;
+      const selected = el.value.slice(start, end);
+
+      let latex = tpl.latex;
+      const mark = latex.indexOf('|');
+      if (selected && mark >= 0) {
+        latex = latex.slice(0, mark) + selected + latex.slice(mark + 1);
+      } else {
+        latex = latex.replace(/\|/g, '');
+      }
+
+      let prefix = '';
+      let suffix = '';
+      if (tpl.wrap === 'inline') {
+        prefix = '$';
+        suffix = '$';
+      } else if (tpl.wrap === 'display') {
+        prefix = '\n$$\n';
+        suffix = '\n$$\n';
+      }
+
+      const body = latex;
+      const insert = prefix + body + suffix;
+      let cursorPos;
+      if (selected && mark >= 0) {
+        cursorPos = start + prefix.length + mark + selected.length;
+      } else if (mark >= 0) {
+        cursorPos = start + prefix.length + mark;
+      } else {
+        cursorPos = start + insert.length;
+      }
+
+      el.setRangeText(insert, start, end, 'end');
+      el.setSelectionRange(cursorPos, cursorPos);
+      syncEditorFromActive();
+      updatePreview();
+      updateCount();
+      autoSave();
+      closeMathMenu();
+      el.focus();
+    }
+
     // 图片上传模态框
     let pendingImageDataUrl = '';
 
@@ -2016,6 +2112,10 @@ ${'</scr' + 'ipt>'}
       const tableDropdown = document.getElementById('table-dropdown');
       if (tableDropdown && !tableDropdown.contains(e.target)) {
         closeTableMenu();
+      }
+      const mathDropdown = document.getElementById('math-dropdown');
+      if (mathDropdown && !mathDropdown.contains(e.target)) {
+        closeMathMenu();
       }
       const langDropdown = document.getElementById('lang-dropdown');
       if (langDropdown && !langDropdown.contains(e.target)) {

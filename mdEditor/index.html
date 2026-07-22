@@ -104,6 +104,11 @@
         <circle cx="7" cy="7" r="2"></circle>
         <circle cx="17" cy="7" r="2"></circle>
       </symbol>
+      <symbol id="icon-math" viewBox="0 0 24 24">
+        <line x1="4" y1="12" x2="20" y2="12"></line>
+        <path d="M8 7c1.2-2 6.8-2 8 0"></path>
+        <path d="M8 17c1.2 2 6.8 2 8 0"></path>
+      </symbol>
     </defs>
   </svg>
   <div class="app">
@@ -188,6 +193,62 @@
           </div>
         </div>
         <button onclick="openFindModal()" data-i18n-title="find" title="查找替换 Ctrl+F"><svg class="icon"><use href="#icon-search"></use></svg> <span data-i18n="find">查找</span></button>
+        <div class="dropdown" id="math-dropdown">
+          <button onclick="toggleMathMenu()" data-i18n-title="math" title="插入数学公式"><svg class="icon"><use href="#icon-math"></use></svg> <span data-i18n="math">公式</span></button>
+          <div class="dropdown-menu math-panel" id="math-menu">
+            <div class="math-cat" data-i18n="mathCatBasic">基础</div>
+            <div class="math-grid">
+              <button type="button" class="math-item" onclick="insertMath('inline')" title="行内公式 $...$">$…$</button>
+              <button type="button" class="math-item" onclick="insertMath('block')" title="块级公式 $$...$$">$$</button>
+              <button type="button" class="math-item" onclick="insertMath('sup')" title="上标">x²</button>
+              <button type="button" class="math-item" onclick="insertMath('sub')" title="下标">xᵢ</button>
+            </div>
+            <div class="math-cat" data-i18n="mathCatFrac">分式 / 根号</div>
+            <div class="math-grid">
+              <button type="button" class="math-item" onclick="insertMath('frac')" title="分式">𝑎/𝑏</button>
+              <button type="button" class="math-item" onclick="insertMath('dfrac')" title="大分式">𝐴/𝐵</button>
+              <button type="button" class="math-item" onclick="insertMath('sqrt')" title="根号">√𝑥</button>
+              <button type="button" class="math-item" onclick="insertMath('sqrtn')" title="n 次根号">ⁿ√𝑥</button>
+            </div>
+            <div class="math-cat" data-i18n="mathCatCalc">求和 / 积分</div>
+            <div class="math-grid">
+              <button type="button" class="math-item" onclick="insertMath('sum')" title="求和">∑</button>
+              <button type="button" class="math-item" onclick="insertMath('prod')" title="连乘">∏</button>
+              <button type="button" class="math-item" onclick="insertMath('int')" title="积分">∫</button>
+              <button type="button" class="math-item" onclick="insertMath('iint')" title="二重积分">∬</button>
+              <button type="button" class="math-item" onclick="insertMath('lim')" title="极限">lim</button>
+              <button type="button" class="math-item" onclick="insertMath('partial')" title="偏导">∂</button>
+            </div>
+            <div class="math-cat" data-i18n="mathCatEq">方程组 / 矩阵</div>
+            <div class="math-grid">
+              <button type="button" class="math-item" onclick="insertMath('cases')" title="方程组">⎧</button>
+              <button type="button" class="math-item" onclick="insertMath('aligned')" title="对齐公式">=</button>
+              <button type="button" class="math-item" onclick="insertMath('pmatrix')" title="圆括号矩阵">( )</button>
+              <button type="button" class="math-item" onclick="insertMath('bmatrix')" title="方括号矩阵">[ ]</button>
+              <button type="button" class="math-item" onclick="insertMath('vmatrix')" title="行列式">| |</button>
+            </div>
+            <div class="math-cat" data-i18n="mathCatSymbol">常用符号</div>
+            <div class="math-grid math-grid-symbols">
+              <button type="button" class="math-item" onclick="insertMath('pm')" title="正负">±</button>
+              <button type="button" class="math-item" onclick="insertMath('times')" title="乘">×</button>
+              <button type="button" class="math-item" onclick="insertMath('div')" title="除">÷</button>
+              <button type="button" class="math-item" onclick="insertMath('cdot')" title="点乘">·</button>
+              <button type="button" class="math-item" onclick="insertMath('neq')" title="不等于">≠</button>
+              <button type="button" class="math-item" onclick="insertMath('leq')" title="小于等于">≤</button>
+              <button type="button" class="math-item" onclick="insertMath('geq')" title="大于等于">≥</button>
+              <button type="button" class="math-item" onclick="insertMath('approx')" title="约等于">≈</button>
+              <button type="button" class="math-item" onclick="insertMath('infty')" title="无穷">∞</button>
+              <button type="button" class="math-item" onclick="insertMath('rightarrow')" title="箭头">→</button>
+              <button type="button" class="math-item" onclick="insertMath('alpha')" title="alpha">α</button>
+              <button type="button" class="math-item" onclick="insertMath('beta')" title="beta">β</button>
+              <button type="button" class="math-item" onclick="insertMath('theta')" title="theta">θ</button>
+              <button type="button" class="math-item" onclick="insertMath('pi')" title="pi">π</button>
+              <button type="button" class="math-item" onclick="insertMath('delta')" title="Delta">Δ</button>
+              <button type="button" class="math-item" onclick="insertMath('omega')" title="omega">ω</button>
+            </div>
+            <p class="math-hint" data-i18n="mathHint">选中文字后再点符号，可填入模板占位处。</p>
+          </div>
+        </div>
         <button onclick="openMermaidModal()" data-i18n-title="mermaid" title="插入 Mermaid 图表"><svg class="icon"><use href="#icon-mermaid"></use></svg> <span data-i18n="mermaid">Mermaid</span></button>
       </div>
       <div class="editor-actions">
@@ -278,7 +339,7 @@
         <p><b>图片与公式</b></p>
         <ul>
           <li>工具栏「图片」支持链接插入或本地上传；本地图片会转为 Base64 嵌入文档，方便离线使用。</li>
-          <li>支持 <code>$...$</code> 行内公式和 <code>$$...$$</code> 块级公式。</li>
+          <li>工具栏「公式」可插入分式、根号、求和、方程组、矩阵等；也支持手写 <code>$...$</code> / <code>$$...$$</code>。</li>
         </ul>
 
         <p><b>网页转 Markdown</b></p>
