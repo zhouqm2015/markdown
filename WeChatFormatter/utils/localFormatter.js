@@ -98,8 +98,8 @@ function escapeHtml(text) {
 
 const IMG_STYLE = 'max-width:100%; height:auto; display:block; margin:16px auto; border-radius:4px;'
 const CODE_STYLE = 'background:#F0F1F3; color:#E53E3E; padding:1px 5px; border-radius:3px; font-size:0.9em; font-family:"JetBrains Mono","Fira Code","Consolas",monospace;'
-const MATH_INLINE_STYLE = 'display:inline-block; vertical-align:middle; margin:0 2px; max-width:100%;'
-const MATH_BLOCK_STYLE = 'display:block; margin:16px auto; max-width:100%;'
+const MATH_INLINE_STYLE = 'display:inline-block; vertical-align:middle; margin:0 3px; max-width:100%; width:auto; height:auto;'
+const MATH_BLOCK_STYLE = 'display:block; margin:12px auto; max-width:100%; width:auto; height:auto;'
 const IMG_PH = '\u0000IMG\u0000'
 const CODE_PH = '\u0000COD\u0000'
 const LINK_PH = '\u0000LNK\u0000'
@@ -113,15 +113,15 @@ const BLOCK_MATH_RE = /\$\$([\s\S]+?)\$\$/g
 const INLINE_MATH_RE = /\$([^\$\n]+?)\$/g
 const BLOCK_MATH_LINE_RE = /^\u0000BMATH(\d+)\u0000$/
 
-/** CodeCogs SVG，便于粘贴公众号（纯前端、无需本地 KaTeX） */
-function latexToSvgUrl(latex) {
-  return `https://latex.codecogs.com/svg.image?${encodeURIComponent(latex)}`
+/** CodeCogs PNG；预览按正常字号显示，复制时再转 RGBA base64 */
+function latexToPngUrl(latex) {
+  return `https://latex.codecogs.com/png.image?${encodeURIComponent('\\dpi{117} ' + latex)}`
 }
 
 function renderMathImg(latex, display) {
   const style = display ? MATH_BLOCK_STYLE : MATH_INLINE_STYLE
   const alt = escapeHtml(latex)
-  return `<img src="${latexToSvgUrl(latex)}" alt="${alt}" style="${style}" />`
+  return `<img class="gs-math" data-gs-math="1" crossorigin="anonymous" src="${latexToPngUrl(latex)}" alt="${alt}" style="${style}" />`
 }
 
 const COLOR_NAME_ALT = '红|橙|黄|绿|青|蓝|紫|粉|灰|黑|白|红色|橙色|黄色|绿色|青色|蓝色|紫色|粉色|灰色|黑色|白色'

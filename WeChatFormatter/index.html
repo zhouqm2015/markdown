@@ -283,6 +283,139 @@
     .gs-tb-btn:active { transform: scale(0.98); }
     .gs-tb-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
 
+    /* 公式面板（对齐 mdEditor） */
+    .gs-math-dropdown {
+      position: relative;
+      display: inline-flex;
+      flex-shrink: 0;
+    }
+    .gs-math-panel {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      z-index: 200;
+      width: auto;
+      max-width: min(660px, calc(100vw - 24px));
+      max-height: min(520px, 80vh);
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
+    }
+    .gs-math-panel[hidden] { display: none !important; }
+    .gs-math-panel-cols {
+      display: flex;
+      align-items: stretch;
+      max-height: min(520px, 80vh);
+    }
+    .gs-math-panel-left,
+    .gs-math-panel-right {
+      overflow-y: auto;
+      padding: 10px;
+    }
+    .gs-math-panel-left {
+      width: 340px;
+      flex-shrink: 0;
+      border-right: 1px solid var(--border);
+    }
+    .gs-math-panel-right {
+      width: 300px;
+      flex: 1;
+      min-width: 240px;
+    }
+    .gs-math-cat {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
+      padding: 2px 4px 6px;
+    }
+    .gs-math-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+    }
+    .gs-math-grid-6 { grid-template-columns: repeat(6, 1fr); }
+    .gs-math-item {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 30px;
+      padding: 4px 2px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .15s ease, border-color .15s ease, color .15s ease;
+      font-family: inherit;
+    }
+    .gs-math-item:hover,
+    .gs-math-formula:hover {
+      background: var(--primary-soft);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .gs-math-formula-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .gs-math-formula {
+      display: flex;
+      flex-direction: row;
+      align-items: baseline;
+      justify-content: flex-start;
+      gap: 8px;
+      width: 100%;
+      min-height: 28px;
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+      font-family: inherit;
+      transition: background .15s ease, border-color .15s ease, color .15s ease;
+    }
+    .gs-math-formula-name {
+      flex-shrink: 0;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .gs-math-formula-preview {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 11px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      color: var(--text-muted);
+    }
+    .gs-math-formula:hover .gs-math-formula-preview { color: inherit; }
+    .gs-math-hint {
+      margin: 10px 4px 2px;
+      font-size: 11px;
+      line-height: 1.4;
+      color: var(--text-muted);
+    }
+    @media (max-width: 640px) {
+      .gs-math-panel-cols { flex-direction: column; }
+      .gs-math-panel-left,
+      .gs-math-panel-right {
+        width: 100%;
+        max-height: min(240px, 40vh);
+      }
+      .gs-math-panel-left {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+    }
+
     .gs-btn-primary {
       background: var(--primary) !important;
       color: #fff !important;
@@ -738,7 +871,100 @@
       <div class="gs-toolbar-group">
         <span class="gs-toolbar-label">插入</span>
         <button id="gs-insert-image" class="gs-tb-btn">图片</button>
-        <button id="gs-insert-formula" class="gs-tb-btn">公式</button>
+        <div class="gs-math-dropdown" id="gs-math-dropdown">
+          <button type="button" id="gs-insert-formula" class="gs-tb-btn" title="插入数学公式">公式</button>
+          <div class="gs-math-panel" id="gs-math-menu" hidden>
+            <div class="gs-math-panel-cols">
+              <div class="gs-math-panel-left">
+                <div class="gs-math-grid gs-math-grid-6">
+                  <button type="button" class="gs-math-item" data-math="inline" title="行内公式 $...$">$…$</button>
+                  <button type="button" class="gs-math-item" data-math="block" title="块级公式 $$...$$">$$</button>
+                  <button type="button" class="gs-math-item" data-math="plus" title="加">+</button>
+                  <button type="button" class="gs-math-item" data-math="minus" title="减">−</button>
+                  <button type="button" class="gs-math-item" data-math="pm" title="正负">±</button>
+                  <button type="button" class="gs-math-item" data-math="times" title="乘">×</button>
+                  <button type="button" class="gs-math-item" data-math="div" title="除">÷</button>
+                  <button type="button" class="gs-math-item" data-math="cdot" title="点乘">·</button>
+                  <button type="button" class="gs-math-item" data-math="neq" title="不等于">≠</button>
+                  <button type="button" class="gs-math-item" data-math="leq" title="小于等于">≤</button>
+                  <button type="button" class="gs-math-item" data-math="geq" title="大于等于">≥</button>
+                  <button type="button" class="gs-math-item" data-math="approx" title="约等于">≈</button>
+                  <button type="button" class="gs-math-item" data-math="lparen" title="左括号">(</button>
+                  <button type="button" class="gs-math-item" data-math="rparen" title="右括号">)</button>
+                  <button type="button" class="gs-math-item" data-math="abs" title="绝对值">|𝑥|</button>
+                  <button type="button" class="gs-math-item" data-math="percent" title="百分号">%</button>
+                  <button type="button" class="gs-math-item" data-math="sup" title="上标">xⁿ</button>
+                  <button type="button" class="gs-math-item" data-math="sub" title="下标">xᵢ</button>
+                  <button type="button" class="gs-math-item" data-math="pow2" title="平方">x²</button>
+                  <button type="button" class="gs-math-item" data-math="pow3" title="立方">x³</button>
+                  <button type="button" class="gs-math-item" data-math="powy" title="x 的 y 次方">xʸ</button>
+                  <button type="button" class="gs-math-item" data-math="frac" title="分式">𝑎/𝑏</button>
+                  <button type="button" class="gs-math-item" data-math="dfrac" title="大分式">𝐴/𝐵</button>
+                  <button type="button" class="gs-math-item" data-math="sqrt" title="平方根">²√𝑥</button>
+                  <button type="button" class="gs-math-item" data-math="cbrt" title="立方根">³√𝑥</button>
+                  <button type="button" class="gs-math-item" data-math="sqrtn" title="n 次根号">ⁿ√𝑥</button>
+                  <button type="button" class="gs-math-item" data-math="recip" title="倒数">1/x</button>
+                  <button type="button" class="gs-math-item" data-math="fact" title="阶乘">x!</button>
+                  <button type="button" class="gs-math-item" data-math="pi" title="圆周率 π">π</button>
+                  <button type="button" class="gs-math-item" data-math="econst" title="自然常数 e">e</button>
+                  <button type="button" class="gs-math-item" data-math="infty" title="无穷">∞</button>
+                  <button type="button" class="gs-math-item" data-math="degree" title="角度">°</button>
+                  <button type="button" class="gs-math-item" data-math="rightarrow" title="箭头">→</button>
+                  <button type="button" class="gs-math-item" data-math="exp" title="e 的 x 次方">eˣ</button>
+                  <button type="button" class="gs-math-item" data-math="pow10" title="10 的 x 次方">10ˣ</button>
+                  <button type="button" class="gs-math-item" data-math="sin" title="正弦">sin</button>
+                  <button type="button" class="gs-math-item" data-math="cos" title="余弦">cos</button>
+                  <button type="button" class="gs-math-item" data-math="tan" title="正切">tan</button>
+                  <button type="button" class="gs-math-item" data-math="ln" title="自然对数">ln</button>
+                  <button type="button" class="gs-math-item" data-math="log10" title="常用对数">log</button>
+                  <button type="button" class="gs-math-item" data-math="log" title="对数">logₙ</button>
+                  <button type="button" class="gs-math-item" data-math="sum" title="求和">∑</button>
+                  <button type="button" class="gs-math-item" data-math="prod" title="连乘">∏</button>
+                  <button type="button" class="gs-math-item" data-math="int" title="积分">∫</button>
+                  <button type="button" class="gs-math-item" data-math="iint" title="二重积分">∬</button>
+                  <button type="button" class="gs-math-item" data-math="lim" title="极限">lim</button>
+                  <button type="button" class="gs-math-item" data-math="partial" title="偏导">∂</button>
+                  <button type="button" class="gs-math-item" data-math="cases" title="方程组">⎧</button>
+                  <button type="button" class="gs-math-item" data-math="aligned" title="对齐公式">=</button>
+                  <button type="button" class="gs-math-item" data-math="pmatrix" title="圆括号矩阵">( )</button>
+                  <button type="button" class="gs-math-item" data-math="bmatrix" title="方括号矩阵">[ ]</button>
+                  <button type="button" class="gs-math-item" data-math="vmatrix" title="行列式">| |</button>
+                  <button type="button" class="gs-math-item" data-math="arcsin" title="反正弦">sin⁻¹</button>
+                  <button type="button" class="gs-math-item" data-math="arccos" title="反余弦">cos⁻¹</button>
+                  <button type="button" class="gs-math-item" data-math="arctan" title="反正切">tan⁻¹</button>
+                  <button type="button" class="gs-math-item" data-math="sinh" title="双曲正弦">sinh</button>
+                  <button type="button" class="gs-math-item" data-math="cosh" title="双曲余弦">cosh</button>
+                  <button type="button" class="gs-math-item" data-math="tanh" title="双曲正切">tanh</button>
+                  <button type="button" class="gs-math-item" data-math="alpha" title="alpha">α</button>
+                  <button type="button" class="gs-math-item" data-math="beta" title="beta">β</button>
+                  <button type="button" class="gs-math-item" data-math="theta" title="theta">θ</button>
+                  <button type="button" class="gs-math-item" data-math="delta" title="Delta">Δ</button>
+                  <button type="button" class="gs-math-item" data-math="omega" title="omega">ω</button>
+                </div>
+                <p class="gs-math-hint">选中文字后再点符号，可填入模板占位处。</p>
+              </div>
+              <div class="gs-math-panel-right">
+                <div class="gs-math-cat">常用公式</div>
+                <div class="gs-math-formula-list">
+                  <button type="button" class="gs-math-formula" data-math="rectArea" title="矩形面积"><span class="gs-math-formula-name">矩形面积</span><span class="gs-math-formula-preview">S = ab</span></button>
+                  <button type="button" class="gs-math-formula" data-math="triangleArea" title="三角形面积"><span class="gs-math-formula-name">三角形面积</span><span class="gs-math-formula-preview">S = ½ah</span></button>
+                  <button type="button" class="gs-math-formula" data-math="circlePerimeter" title="圆周长"><span class="gs-math-formula-name">圆周长</span><span class="gs-math-formula-preview">C = 2πr</span></button>
+                  <button type="button" class="gs-math-formula" data-math="circleArea" title="圆面积"><span class="gs-math-formula-name">圆面积</span><span class="gs-math-formula-preview">S = πr²</span></button>
+                  <button type="button" class="gs-math-formula" data-math="diffSquares" title="平方差公式"><span class="gs-math-formula-name">平方差</span><span class="gs-math-formula-preview">a²−b²=(a+b)(a−b)</span></button>
+                  <button type="button" class="gs-math-formula" data-math="perfectSquare" title="完全平方公式"><span class="gs-math-formula-name">完全平方</span><span class="gs-math-formula-preview">(a±b)²</span></button>
+                  <button type="button" class="gs-math-formula" data-math="quadratic" title="一元二次方程求根公式"><span class="gs-math-formula-name">求根公式</span><span class="gs-math-formula-preview">x = (−b±√Δ)/2a</span></button>
+                  <button type="button" class="gs-math-formula" data-math="pythagorean" title="勾股定理"><span class="gs-math-formula-name">勾股定理</span><span class="gs-math-formula-preview">a²+b²=c²</span></button>
+                  <button type="button" class="gs-math-formula" data-math="linearFn" title="一次函数"><span class="gs-math-formula-name">一次函数</span><span class="gs-math-formula-preview">y = kx+b</span></button>
+                  <button type="button" class="gs-math-formula" data-math="arithmetic" title="等差数列通项"><span class="gs-math-formula-name">等差通项</span><span class="gs-math-formula-preview">aₙ=a₁+(n−1)d</span></button>
+                  <button type="button" class="gs-math-formula" data-math="geometric" title="等比数列求和"><span class="gs-math-formula-name">等比求和</span><span class="gs-math-formula-preview">Sₙ=a₁(1−qⁿ)/(1−q)</span></button>
+                  <button type="button" class="gs-math-formula" data-math="trigIdentity" title="三角恒等式"><span class="gs-math-formula-name">三角恒等</span><span class="gs-math-formula-preview">sin²θ+cos²θ=1</span></button>
+                  <button type="button" class="gs-math-formula" data-math="ellipse" title="椭圆标准方程"><span class="gs-math-formula-name">椭圆方程</span><span class="gs-math-formula-preview">x²/a²+y²/b²=1</span></button>
+                  <button type="button" class="gs-math-formula" data-math="derivativeDef" title="导数定义"><span class="gs-math-formula-name">导数定义</span><span class="gs-math-formula-preview">lim Δy/Δx</span></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         <span class="gs-tb-sep"></span>
         <button id="gs-md-bold" class="gs-tb-btn"><b>B</b></button>
         <button id="gs-md-italic" class="gs-tb-btn"><i>I</i></button>
@@ -845,7 +1071,7 @@
         <ul>
           <li>右侧预览区可直接微调文字；支持撤销/重做（<kbd>Ctrl+Z</kbd> / <kbd>Ctrl+Y</kbd>）。</li>
           <li>支持粘贴图片、粘贴 Excel 表格、插入公式与目录。</li>
-          <li>公式支持 <code>$...$</code> 行内与 <code>$$...$$</code> 块级（一键排版后渲染为图片）。</li>
+          <li>公式支持 <code>$...$</code> 行内与 <code>$$...$$</code> 块级；点「公式」打开符号/常用公式面板插入（排版为 PNG，复制时自动转 base64）。</li>
           <li>草稿会自动保存到浏览器本地，也可在「草稿」里管理多份内容。</li>
         </ul>
 

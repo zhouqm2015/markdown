@@ -119,7 +119,7 @@ node server.js
 | 引用 / 分割线 | `>` / `---` |
 | 代码 | 行内 `` `code` ``；围栏代码块 |
 | 表格 | `\| a \| b \|` |
-| 公式 | `$$ LaTeX $$`（CodeCogs SVG） |
+| 公式 | `$$ LaTeX $$`（CodeCogs PNG，复制时转 base64） |
 
 完整说明见使用指南。
 
@@ -204,7 +204,7 @@ https://www.zybkpro.top/WeChatFormatter/
 - 本地内联样式排版引擎
 - 可选：OpenAI 兼容 Chat Completions
 - 长图：html2canvas（已 vendor）
-- 公式：CodeCogs LaTeX SVG
+- 公式：CodeCogs LaTeX PNG（复制到公众号前转为 base64）
 
 ---
 

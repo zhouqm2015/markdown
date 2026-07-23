@@ -9,6 +9,7 @@
     "dist:desktop": "npm --prefix electron run dist",
     "build": "node scripts/build.js",
     "build:mdEditor": "node scripts/build.js",
+    "build:wechat": "node scripts/build-wechat.js",
     "deploy": "bash scripts/deploy.sh"
   },
   "devDependencies": {

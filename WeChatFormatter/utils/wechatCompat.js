@@ -729,6 +729,143 @@ function isTechCssBgActive(sourceEl) {
   }
 }
 
+/**
+ * 将外链图片（尤其是公式 PNG）转为 data:image/png;base64。
+ * 公众号编辑器无法拉取 latex.codecogs.com 等外链，且不接受 SVG / 过小图。
+ */
+function loadImgElement(src, useCors) {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    if (useCors) img.crossOrigin = 'anonymous'
+    img.onload = () => resolve(img)
+    img.onerror = () => reject(new Error('image load failed'))
+    img.src = src
+  })
+}
+
+async function loadImageCors(src) {
+  // fetch→blob 再绘制，避免缓存图未带 CORS 头导致 canvas 污染
+  try {
+    const res = await fetch(src, { mode: 'cors', cache: 'no-store' })
+    if (!res.ok) throw new Error(`http ${res.status}`)
+    const blob = await res.blob()
+    const objUrl = URL.createObjectURL(blob)
+    try {
+      return await loadImgElement(objUrl, false)
+    } finally {
+      URL.revokeObjectURL(objUrl)
+    }
+  } catch (_) {
+    return loadImgElement(src, true)
+  }
+}
+
+/**
+ * 转成 RGBA PNG。
+ * - preview：基本 1:1，只去索引色/透明，避免预览被撑得过大
+ * - wechat：适度放大过小图并加白边，降低公众号拒收；显示尺寸仍靠 style 控制
+ */
+function rasterToPngDataUrl(img, { forWechat = false } = {}) {
+  const srcW = img.naturalWidth || img.width
+  const srcH = img.naturalHeight || img.height
+  if (!srcW || !srcH) return ''
+
+  let scale = 1
+  let padX = 4
+  let padY = 4
+  if (forWechat) {
+    // 只按高度补到约 40px，上限 2.5 倍，避免窄分式被拉成巨型图
+    scale = Math.min(2.5, Math.max(1, 40 / srcH))
+    padX = 10
+    padY = 8
+  }
+
+  const drawW = Math.max(1, Math.round(srcW * scale))
+  const drawH = Math.max(1, Math.round(srcH * scale))
+  const canvas = document.createElement('canvas')
+  canvas.width = Math.max(drawW + padX * 2, forWechat ? 60 : 1)
+  canvas.height = Math.max(drawH + padY * 2, forWechat ? 36 : 1)
+  const ctx = canvas.getContext('2d')
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  ctx.imageSmoothingEnabled = true
+  ctx.imageSmoothingQuality = 'high'
+  const x = Math.round((canvas.width - drawW) / 2)
+  const y = Math.round((canvas.height - drawH) / 2)
+  ctx.drawImage(img, x, y, drawW, drawH)
+  return canvas.toDataURL('image/png')
+}
+
+async function mapPool(items, limit, worker) {
+  const ret = new Array(items.length)
+  let i = 0
+  const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (i < items.length) {
+      const idx = i++
+      ret[idx] = await worker(items[idx], idx)
+    }
+  })
+  await Promise.all(runners)
+  return ret
+}
+
+function applyMathDisplayStyle(el) {
+  const isBlock = /display:\s*block/i.test(el.getAttribute('style') || '')
+  el.setAttribute(
+    'style',
+    isBlock
+      ? 'display:block;margin:12px auto;max-width:100%;width:auto;height:auto;'
+      : 'display:inline-block;vertical-align:middle;margin:0 3px;max-width:100%;width:auto;height:auto;'
+  )
+}
+
+async function convertOneImage(el, { forWechat = false, retries = 2 } = {}) {
+  const src = el.getAttribute('src') || ''
+  const isHttp = /^https?:\/\//i.test(src)
+  const isData = src.startsWith('data:image/')
+  const isMath = el.getAttribute('data-gs-math') === '1' || el.classList.contains('gs-math')
+
+  // 预览：只处理外链；复制：外链 + 已内联的公式图都按微信规则重编码
+  if (!src || src.startsWith('blob:')) return true
+  if (!forWechat && !isHttp) {
+    if (isMath && isData) applyMathDisplayStyle(el)
+    return true
+  }
+  if (!isHttp && !(forWechat && isMath && isData)) return true
+  if (!isHttp && !isMath) return true
+
+  let lastErr
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const img = isData ? await loadImgElement(src, false) : await loadImageCors(src)
+      const dataUrl = rasterToPngDataUrl(img, { forWechat })
+      if (!dataUrl || dataUrl.length < 100) throw new Error('empty png')
+      el.setAttribute('src', dataUrl)
+      el.removeAttribute('crossorigin')
+      if (isMath) applyMathDisplayStyle(el)
+      return true
+    } catch (e) {
+      lastErr = e
+      await new Promise((r) => setTimeout(r, 200 * (attempt + 1)))
+    }
+  }
+  console.warn('图片内联失败', src.slice(0, 80), lastErr)
+  return false
+}
+
+async function embedExternalImagesAsPng(root, opts = {}) {
+  const forWechat = !!opts.forWechat
+  const imgs = Array.from(root.querySelectorAll('img[src]'))
+  const results = await mapPool(imgs, 3, (el) => convertOneImage(el, { forWechat }))
+  const failed = results.filter((ok) => ok === false).length
+  if (failed) {
+    console.warn(`仍有 ${failed} 张外链图未能内联，粘贴公众号可能失败`)
+  }
+  return failed === 0
+}
+
+export { embedExternalImagesAsPng }
+
 export async function buildWechatHTML(sourceEl) {
   const clone = sourceEl.cloneNode(true)
   clone.removeAttribute('contenteditable')
@@ -736,6 +873,8 @@ export async function buildWechatHTML(sourceEl) {
 
   bakeTreeFromSource(sourceEl, clone)
   normalizeForWechat(clone, sourceEl)
+  // 公式等外链图转成 PNG base64，避免公众号「内容插入失败」
+  await embedExternalImagesAsPng(clone, { forWechat: true })
 
   const rootCs = window.getComputedStyle(sourceEl)
   const shell = sourceEl.closest?.('.gs-preview-box')
@@ -816,10 +955,19 @@ function copyHtmlViaExecCommandSync(html, plain) {
 }
 
 export async function copyWechatHTML(sourceEl) {
+  // 预览区仅做轻量内联（保持正常字号）；微信优化在 buildWechatHTML 的 clone 上做
+  if (sourceEl) {
+    try { await embedExternalImagesAsPng(sourceEl, { forWechat: false }) } catch (_) { /* ignore */ }
+  }
   const html = await buildWechatHTML(sourceEl)
   const tmp = document.createElement('div')
   tmp.innerHTML = html
   const plain = tmp.textContent || ''
+
+  const leftover = (html.match(/https?:\/\/latex\.codecogs\.com/gi) || []).length
+  if (leftover) {
+    console.warn(`复制内容仍含 ${leftover} 个公式外链，公众号可能插入失败`)
+  }
 
   if (copyHtmlViaExecCommandSync(html, plain)) return true
 

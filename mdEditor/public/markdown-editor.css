@@ -286,12 +286,32 @@
     }
     /* 数学公式面板 */
     .math-panel {
-      width: 320px;
-      max-width: min(320px, calc(100vw - 24px));
-      max-height: min(420px, 70vh);
+      width: auto;
+      max-width: min(660px, calc(100vw - 24px));
+      max-height: min(520px, 80vh);
+      overflow: hidden;
+      padding: 0;
+      gap: 0;
+    }
+    .math-panel-cols {
+      display: flex;
+      align-items: stretch;
+      max-height: min(520px, 80vh);
+    }
+    .math-panel-left,
+    .math-panel-right {
       overflow-y: auto;
       padding: 10px;
-      gap: 0;
+    }
+    .math-panel-left {
+      width: 340px;
+      flex-shrink: 0;
+      border-right: 1px solid var(--border);
+    }
+    .math-panel-right {
+      width: 300px;
+      flex: 1;
+      min-width: 240px;
     }
     .math-cat {
       font-size: 11px;
@@ -300,11 +320,15 @@
       letter-spacing: 0.02em;
       padding: 8px 4px 4px;
     }
-    .math-cat:first-child { padding-top: 2px; }
+    .math-panel-left > .math-cat:first-child,
+    .math-panel-right > .math-cat:first-child { padding-top: 2px; }
     .math-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 4px;
+    }
+    .math-grid-6 {
+      grid-template-columns: repeat(6, 1fr);
     }
     .math-grid-symbols {
       grid-template-columns: repeat(8, 1fr);
@@ -319,21 +343,84 @@
       border-radius: var(--radius-sm);
       background: var(--panel-bg);
       color: var(--text);
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 500;
       cursor: pointer;
       transition: background .15s ease, border-color .15s ease, color .15s ease;
+    }
+    .math-grid-6 .math-item {
+      font-size: 12px;
+      min-height: 30px;
     }
     .math-item:hover {
       background: var(--accent-soft);
       border-color: var(--accent);
       color: var(--accent);
     }
+    .math-formula-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .math-formula {
+      display: flex;
+      flex-direction: row;
+      align-items: baseline;
+      justify-content: flex-start;
+      flex-wrap: nowrap;
+      gap: 8px;
+      width: 100%;
+      min-height: 28px;
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--panel-bg);
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+      transition: background .15s ease, border-color .15s ease, color .15s ease;
+    }
+    .math-formula:hover {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .math-formula-name {
+      flex-shrink: 0;
+      font-size: 11px;
+      font-weight: 400;
+    }
+    .math-formula-preview {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 11px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      color: var(--text-muted);
+    }
+    .math-formula:hover .math-formula-preview {
+      color: inherit;
+    }
     .math-hint {
       margin: 10px 4px 2px;
       font-size: 11px;
       line-height: 1.4;
       color: var(--text-muted);
+    }
+    @media (max-width: 640px) {
+      .math-panel-cols {
+        flex-direction: column;
+      }
+      .math-panel-left,
+      .math-panel-right {
+        width: 100%;
+        max-height: min(240px, 40vh);
+      }
+      .math-panel-left {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
     }
     /* 主编辑区 */
     .main {

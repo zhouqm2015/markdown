@@ -6,7 +6,7 @@ dist/
 mdEditor/dist/
 WeChatFormatter/dist/
 **/dist/
-
+index/
 # 部署包
 *.tar.gz
 *.zip

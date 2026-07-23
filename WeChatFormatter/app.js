@@ -192,6 +192,12 @@ function copyToWechat(btnId) {
     return
   }
 
+  const btn = btnId ? $(btnId) : null
+  if (btn) {
+    btn.dataset.origLabel = btn.dataset.origLabel || btn.innerHTML
+    btn.innerHTML = '处理图片…'
+  }
+
   window.__gsWechatCompat.copyWechatHTML(preview).then((ok) => {
     flashBtn(ok)
     if (!ok) alert('自动复制失败，请手动全选预览区后 Ctrl/⌘+C')
@@ -987,7 +993,7 @@ async function applyFormat() {
 
     await updateModeBadge()
 
-    const { formatLocally } = await import('./utils/localFormatter.js?v=20260722a')
+    const { formatLocally } = await import('./utils/localFormatter.js?v=20260723g')
     const headerBg = headerBgPicker.value || '#1A3C6D'
     const h1c = h1Color.value
     const h1s = h1Size.value
@@ -1000,6 +1006,15 @@ async function applyFormat() {
     let result = formatLocally(text, headerBg, h1c, h1s, h2c, h2s, h3c, h3s, h4c, h4s)
     if (!result || !result.trim()) result = '<p>排版结果为空</p>'
     preview.innerHTML = injectStatsAfterTitle(result)
+
+    // 公式等外链图预转 base64，复制到公众号时不再依赖第三方拉取
+    if (window.__gsWechatCompat?.embedExternalImagesAsPng) {
+      try {
+        await window.__gsWechatCompat.embedExternalImagesAsPng(preview, { forWechat: false })
+      } catch (err) {
+        console.warn('公式图片内联失败', err)
+      }
+    }
 
     applyIndent()
     // 应用字体
@@ -1214,7 +1229,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderHistoryPanel()
   updateModeBadge()
   // 预加载复制模块，保证点击时同步可用（剪贴板需要用户手势）
-  import('./utils/wechatCompat.js?v=20260718o').then((m) => { window.__gsWechatCompat = m }).catch(console.error)
+  import('./utils/wechatCompat.js?v=20260723e').then((m) => { window.__gsWechatCompat = m }).catch(console.error)
 
   // 页脚
   const footer = $('gs-footer')
@@ -1297,17 +1312,156 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   })
 
-  // 插入公式：写入左侧 Markdown，一键排版时由 localFormatter 解析为 CodeCogs SVG
-  $('gs-insert-formula')?.addEventListener('click', () => {
-    const latex = prompt('输入 LaTeX 公式（可含 \\frac、\\sqrt 等）：')
-    if (!latex || !latex.trim()) return
-    const trimmed = latex.trim()
-    const isBlock = /\n/.test(trimmed) || /\\begin\{|\\dfrac|\\sum|\\int|\\lim|\\prod/.test(trimmed) || trimmed.length > 48
-    const md = isBlock ? `\n$$\n${trimmed}\n$$\n` : `$${trimmed}$`
+  // 插入公式：mdEditor 风格面板，写入左侧 Markdown
+  const MATH_TEMPLATES = {
+    inline: { latex: '|', wrap: 'inline' },
+    block: { latex: '|', wrap: 'display' },
+    sup: { latex: '^{|}', wrap: 'inline' },
+    sub: { latex: '_{|}', wrap: 'inline' },
+    lparen: { latex: '(', wrap: 'inline' },
+    rparen: { latex: ')', wrap: 'inline' },
+    abs: { latex: '\\lvert |\\rvert', wrap: 'inline' },
+    percent: { latex: '\\%', wrap: 'inline' },
+    pow2: { latex: '|^{2}', wrap: 'inline' },
+    pow3: { latex: '|^{3}', wrap: 'inline' },
+    powy: { latex: 'x^{|}', wrap: 'inline' },
+    exp: { latex: 'e^{|}', wrap: 'inline' },
+    pow10: { latex: '10^{|}', wrap: 'inline' },
+    recip: { latex: '\\dfrac{1}{|}', wrap: 'inline' },
+    frac: { latex: '\\frac{|}{}', wrap: 'inline' },
+    dfrac: { latex: '\\dfrac{|}{}', wrap: 'display' },
+    sqrt: { latex: '\\sqrt{|}', wrap: 'inline' },
+    cbrt: { latex: '\\sqrt[3]{|}', wrap: 'inline' },
+    sqrtn: { latex: '\\sqrt[n]{|}', wrap: 'inline' },
+    fact: { latex: '(|)!', wrap: 'inline' },
+    sin: { latex: '\\sin(|)', wrap: 'inline' },
+    cos: { latex: '\\cos(|)', wrap: 'inline' },
+    tan: { latex: '\\tan(|)', wrap: 'inline' },
+    ln: { latex: '\\ln(|)', wrap: 'inline' },
+    log10: { latex: '\\log_{10}(|)', wrap: 'inline' },
+    log: { latex: '\\log_{n}(|)', wrap: 'inline' },
+    sinh: { latex: '\\sinh(|)', wrap: 'inline' },
+    cosh: { latex: '\\cosh(|)', wrap: 'inline' },
+    tanh: { latex: '\\tanh(|)', wrap: 'inline' },
+    arcsin: { latex: '\\arcsin(|)', wrap: 'inline' },
+    arccos: { latex: '\\arccos(|)', wrap: 'inline' },
+    arctan: { latex: '\\arctan(|)', wrap: 'inline' },
+    sum: { latex: '\\sum_{i=1}^{n} |', wrap: 'display' },
+    prod: { latex: '\\prod_{i=1}^{n} |', wrap: 'display' },
+    int: { latex: '\\int_{a}^{b} | \\, dx', wrap: 'display' },
+    iint: { latex: '\\iint_{D} | \\, dA', wrap: 'display' },
+    lim: { latex: '\\lim_{n \\to \\infty} |', wrap: 'display' },
+    partial: { latex: '\\frac{\\partial |}{\\partial x}', wrap: 'inline' },
+    cases: { latex: '\\begin{cases}\n  | \\\\\\\\\n  \n\\end{cases}', wrap: 'display' },
+    aligned: { latex: '\\begin{aligned}\n  | &= \\\\\\\\\n   &= \n\\end{aligned}', wrap: 'display' },
+    pmatrix: { latex: '\\begin{pmatrix}\n  a & b \\\\\\\\\n  c & d\n\\end{pmatrix}', wrap: 'display' },
+    bmatrix: { latex: '\\begin{bmatrix}\n  a & b \\\\\\\\\n  c & d\n\\end{bmatrix}', wrap: 'display' },
+    vmatrix: { latex: '\\begin{vmatrix}\n  a & b \\\\\\\\\n  c & d\n\\end{vmatrix}', wrap: 'display' },
+    plus: { latex: '+', wrap: 'inline' },
+    minus: { latex: '-', wrap: 'inline' },
+    pm: { latex: '\\pm', wrap: 'inline' },
+    times: { latex: '\\times', wrap: 'inline' },
+    div: { latex: '\\div', wrap: 'inline' },
+    cdot: { latex: '\\cdot', wrap: 'inline' },
+    neq: { latex: '\\neq', wrap: 'inline' },
+    leq: { latex: '\\leq', wrap: 'inline' },
+    geq: { latex: '\\geq', wrap: 'inline' },
+    approx: { latex: '\\approx', wrap: 'inline' },
+    infty: { latex: '\\infty', wrap: 'inline' },
+    rightarrow: { latex: '\\rightarrow', wrap: 'inline' },
+    econst: { latex: 'e', wrap: 'inline' },
+    alpha: { latex: '\\alpha', wrap: 'inline' },
+    beta: { latex: '\\beta', wrap: 'inline' },
+    theta: { latex: '\\theta', wrap: 'inline' },
+    pi: { latex: '\\pi', wrap: 'inline' },
+    delta: { latex: '\\Delta', wrap: 'inline' },
+    omega: { latex: '\\omega', wrap: 'inline' },
+    degree: { latex: '^{\\circ}', wrap: 'inline' },
+    rectArea: { latex: 'S = ab', wrap: 'display' },
+    triangleArea: { latex: 'S = \\dfrac{1}{2}ah', wrap: 'display' },
+    circlePerimeter: { latex: 'C = 2\\pi r', wrap: 'display' },
+    circleArea: { latex: 'S = \\pi r^{2}', wrap: 'display' },
+    diffSquares: { latex: 'a^{2} - b^{2} = (a+b)(a-b)', wrap: 'display' },
+    perfectSquare: { latex: '(a \\pm b)^{2} = a^{2} \\pm 2ab + b^{2}', wrap: 'display' },
+    quadratic: { latex: 'x = \\dfrac{-b \\pm \\sqrt{b^{2}-4ac}}{2a}', wrap: 'display' },
+    pythagorean: { latex: 'a^{2} + b^{2} = c^{2}', wrap: 'display' },
+    linearFn: { latex: 'y = kx + b', wrap: 'display' },
+    arithmetic: { latex: 'a_{n} = a_{1} + (n-1)d', wrap: 'display' },
+    geometric: { latex: 'S_{n} = \\dfrac{a_{1}(1-q^{n})}{1-q}', wrap: 'display' },
+    trigIdentity: { latex: '\\sin^{2}\\theta + \\cos^{2}\\theta = 1', wrap: 'display' },
+    ellipse: { latex: '\\dfrac{x^{2}}{a^{2}} + \\dfrac{y^{2}}{b^{2}} = 1', wrap: 'display' },
+    derivativeDef: { latex: 'f\'(x) = \\lim_{\\Delta x \\to 0} \\dfrac{f(x+\\Delta x)-f(x)}{\\Delta x}', wrap: 'display' }
+  }
+
+  function closeMathMenu() {
+    const menu = $('gs-math-menu')
+    if (menu) menu.hidden = true
+  }
+
+  function toggleMathMenu() {
+    const menu = $('gs-math-menu')
+    if (!menu) return
+    menu.hidden = !menu.hidden
+  }
+
+  function insertMath(id) {
+    const tpl = MATH_TEMPLATES[id]
+    if (!tpl) return
     const start = input.selectionStart
     const end = input.selectionEnd
-    input.setRangeText(md, start, end, 'end')
+    const selected = input.value.slice(start, end)
+
+    let latex = tpl.latex
+    const mark = latex.indexOf('|')
+    if (selected && mark >= 0) {
+      latex = latex.slice(0, mark) + selected + latex.slice(mark + 1)
+    } else {
+      latex = latex.replace(/\|/g, '')
+    }
+
+    let prefix = ''
+    let suffix = ''
+    if (tpl.wrap === 'inline') {
+      prefix = '$'
+      suffix = '$'
+    } else if (tpl.wrap === 'display') {
+      prefix = '\n$$\n'
+      suffix = '\n$$\n'
+    }
+
+    const insert = prefix + latex + suffix
+    let cursorPos
+    if (selected && mark >= 0) {
+      cursorPos = start + prefix.length + mark + selected.length
+    } else if (mark >= 0) {
+      cursorPos = start + prefix.length + mark
+    } else {
+      cursorPos = start + insert.length
+    }
+
+    input.setRangeText(insert, start, end, 'end')
+    input.setSelectionRange(cursorPos, cursorPos)
     input.focus()
+    input.dispatchEvent(new Event('input', { bubbles: true }))
+    closeMathMenu()
+  }
+
+  $('gs-insert-formula')?.addEventListener('click', (e) => {
+    e.stopPropagation()
+    toggleMathMenu()
+  })
+  $('gs-math-menu')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-math]')
+    if (!btn) return
+    e.preventDefault()
+    insertMath(btn.getAttribute('data-math'))
+  })
+  document.addEventListener('click', (e) => {
+    const wrap = $('gs-math-dropdown')
+    if (wrap && !wrap.contains(e.target)) closeMathMenu()
+  })
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeMathMenu()
   })
 
   // Markdown 快捷插入
