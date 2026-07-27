@@ -2,7 +2,7 @@
   "name": "markdown-tools-desktop",
   "version": "1.0.0",
   "private": true,
-  "description": "Markdown 工具集桌面端（加载线上 markdown / mdEditor / WeChatFormatter）",
+  "description": "Markdown 工具集桌面端（本地加载 index / mdEditor / WeChatFormatter）",
   "main": "main.js",
   "author": "zybkpro",
   "license": "MIT",
@@ -31,7 +31,22 @@
       "main.js",
       "preload.js",
       "shell.html",
-      "package.json"
+      "package.json",
+      {
+        "from": "../index",
+        "to": "content/index",
+        "filter": ["**/*", "!**/.DS_Store"]
+      },
+      {
+        "from": "../mdEditor",
+        "to": "content/mdEditor",
+        "filter": ["**/*", "!dist/**", "!**/.DS_Store"]
+      },
+      {
+        "from": "../WeChatFormatter",
+        "to": "content/WeChatFormatter",
+        "filter": ["**/*", "!dist/**", "!**/.DS_Store"]
+      }
     ],
     "mac": {
       "category": "public.app-category.productivity",

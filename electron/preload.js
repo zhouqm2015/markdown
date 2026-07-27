@@ -3,6 +3,8 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('shellApi', {
+  getPages: () => ipcRenderer.invoke('get-pages'),
+  openExternal: (url) => ipcRenderer.invoke('open-external', url),
   notifyPage: (page) => ipcRenderer.send('page-changed', page),
   onNavigate: (callback) => {
     ipcRenderer.on('navigate-page', (_event, page) => callback(page));

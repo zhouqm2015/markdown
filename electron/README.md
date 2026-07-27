@@ -1,12 +1,14 @@
 # Markdown 工具集 · 桌面端
 
-Electron 壳应用，三个页面直接加载线上地址（内容更新后刷新即可，无需重新打包）：
+Electron 壳应用，三个页面直接加载仓库本地目录（开发与打包均不依赖线上地址）：
 
-| 菜单 | 地址 |
-|------|------|
-| 官网首页 | https://www.zybkpro.top/markdown/ |
-| Markdown 编辑器 | https://www.zybkpro.top/mdEditor/ |
-| 公众号排版 | https://www.zybkpro.top/WeChatFormatter/ |
+| 菜单 | 本地路径 |
+|------|----------|
+| 官网首页 | `../index/index.html` |
+| Markdown 编辑器 | `../mdEditor/index.html` |
+| 公众号排版 | `../WeChatFormatter/index.html` |
+
+打包后上述目录会打进应用内的 `content/`。
 
 ## 开发启动
 
@@ -28,7 +30,7 @@ npm run dist:win
 npm run dist:linux
 ```
 
-壳本身很轻，只包含窗口与菜单；页面资源始终走线上。应用图标位于 `build/icon.icns` / `build/icon.png`。
+应用图标位于 `build/icon.icns` / `build/icon.png`。
 
 ## 快捷键
 
@@ -40,6 +42,6 @@ npm run dist:linux
 
 ## 说明
 
-- 需要能访问 `www.zybkpro.top`。
-- 同站链接在应用内打开，其它外链走系统浏览器。
-- 各页面的草稿 / API Key 仍保存在页面 localStorage（按域名隔离）。
+- 离线可用，页面资源来自本地项目目录。
+- 同项目内的本地链接在应用内打开，其它 http(s) 外链走系统浏览器。
+- 各页面的草稿 / API Key 仍保存在页面 localStorage（按 `file://` 源隔离）。

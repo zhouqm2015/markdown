@@ -1,7 +1,8 @@
 'use strict';
 
-const { app, BrowserWindow, Menu, dialog, ipcMain } = require('electron');
+const { app, BrowserWindow, Menu, dialog, ipcMain, shell } = require('electron');
 const path = require('path');
+const { pathToFileURL } = require('url');
 
 const PAGE_TITLES = {
   home: '首页',
@@ -10,6 +11,21 @@ const PAGE_TITLES = {
 };
 
 let mainWindow = null;
+
+function getContentRoot() {
+  return app.isPackaged
+    ? path.join(__dirname, 'content')
+    : path.join(__dirname, '..');
+}
+
+function getPageUrls() {
+  const root = getContentRoot();
+  return {
+    home: pathToFileURL(path.join(root, 'index', 'index.html')).href,
+    editor: pathToFileURL(path.join(root, 'mdEditor', 'index.html')).href,
+    wechat: pathToFileURL(path.join(root, 'WeChatFormatter', 'index.html')).href,
+  };
+}
 
 function sendToShell(channel, ...args) {
   if (!mainWindow || mainWindow.isDestroyed()) return;
@@ -25,6 +41,7 @@ function reloadContent(force = false) {
 }
 
 function buildMenu() {
+  const pages = getPageUrls();
   const template = [
     {
       label: 'Markdown 工具集',
@@ -37,11 +54,10 @@ function buildMenu() {
               title: '关于 Markdown 工具集',
               message: 'Markdown 工具集',
               detail:
-                '桌面端壳：直接加载线上页面\n' +
-                'https://www.zybkpro.top/markdown/\n' +
-                'https://www.zybkpro.top/mdEditor/\n' +
-                'https://www.zybkpro.top/WeChatFormatter/\n\n' +
-                '线上内容更新后，刷新即可，无需重新打包。',
+                '桌面端：加载本地项目页面\n' +
+                `首页：${pages.home}\n` +
+                `编辑器：${pages.editor}\n` +
+                `公众号排版：${pages.wechat}`,
             });
           },
         },
@@ -97,13 +113,14 @@ function buildMenu() {
 }
 
 function createWindow() {
+  const pages = getPageUrls();
   mainWindow = new BrowserWindow({
     width: 1440,
     height: 900,
     minWidth: 960,
     minHeight: 640,
     title: PAGE_TITLES.home,
-    show: true,
+    show: false,
     backgroundColor: '#f4f5f7',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -114,12 +131,25 @@ function createWindow() {
     },
   });
 
-  mainWindow.loadFile(path.join(__dirname, 'shell.html'));
+  mainWindow.once('ready-to-show', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.show();
+  });
+
+  mainWindow.loadFile(path.join(__dirname, 'shell.html'), {
+    query: { pages: JSON.stringify(pages) },
+  });
 
   mainWindow.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
 }
 
 function bootstrap() {
+  ipcMain.handle('get-pages', () => getPageUrls());
+  ipcMain.handle('open-external', (_event, url) => {
+    if (typeof url === 'string' && /^https?:\/\//i.test(url)) {
+      return shell.openExternal(url);
+    }
+  });
+
   ipcMain.on('page-changed', (_event, page) => {
     if (mainWindow && PAGE_TITLES[page]) {
       mainWindow.setTitle(PAGE_TITLES[page]);
@@ -141,13 +171,14 @@ if (!gotLock) {
     }
   });
 
-  app.whenReady().then(bootstrap).catch((err) => {
+  app.whenReady().then(() => {
+    bootstrap();
+    app.on('activate', () => {
+      if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    });
+  }).catch((err) => {
     dialog.showErrorBox('启动失败', err.stack || String(err));
     app.quit();
-  });
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 
   app.on('window-all-closed', () => {

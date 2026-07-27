@@ -62,14 +62,9 @@
       <button type="button" data-page="editor">Markdown编辑器</button>
       <button type="button" data-page="wechat">Markdown转公众号</button>
     </nav>
-    <webview id="content" src="https://www.zybkpro.top/markdown/" allowpopups></webview>
+    <webview id="content" allowpopups></webview>
   </div>
   <script>
-    const PAGES = {
-      home: 'https://www.zybkpro.top/markdown/',
-      editor: 'https://www.zybkpro.top/mdEditor/',
-      wechat: 'https://www.zybkpro.top/WeChatFormatter/',
-    };
     const TITLES = {
       home: '首页',
       editor: 'Markdown编辑器',
@@ -78,19 +73,99 @@
 
     const webview = document.getElementById('content');
     const buttons = [...document.querySelectorAll('button[data-page]')];
+    let PAGES = {};
+    let currentPage = 'home';
+    let bootstrapped = false;
+
+    try {
+      PAGES = JSON.parse(new URLSearchParams(location.search).get('pages') || '{}') || {};
+    } catch (_) {
+      PAGES = {};
+    }
+
+    function dirOf(fileUrl) {
+      return fileUrl.replace(/index\.html$/i, '');
+    }
+
+    function pageFromUrl(url) {
+      if (!url) return null;
+      try {
+        const decoded = decodeURI(url);
+        for (const [key, pageUrl] of Object.entries(PAGES)) {
+          if (!pageUrl) continue;
+          if (decoded === pageUrl || decoded === dirOf(pageUrl)) return key;
+          if (decoded.startsWith(dirOf(pageUrl))) return key;
+        }
+      } catch (_) { /* ignore */ }
+      return null;
+    }
 
     function setActive(page) {
+      currentPage = page;
       buttons.forEach((btn) => {
         btn.classList.toggle('active', btn.dataset.page === page);
       });
       document.title = TITLES[page] || 'Markdown 工具集';
+      window.shellApi?.notifyPage?.(page);
     }
 
     function navigate(page) {
       if (!PAGES[page]) return;
       setActive(page);
-      webview.src = PAGES[page];
-      window.shellApi?.notifyPage?.(page);
+      const url = PAGES[page];
+      // 强制触发加载：先清空再设 src，避免 webview 对相同导航吞掉首次渲染
+      if (webview.getAttribute('src') === url) {
+        webview.removeAttribute('src');
+      }
+      webview.setAttribute('src', url);
+    }
+
+    function syncFromWebviewUrl(url) {
+      const page = pageFromUrl(url);
+      if (page && page !== currentPage) setActive(page);
+    }
+
+    function handleExternalOrLocal(url) {
+      if (!url) return;
+      try {
+        const u = new URL(url);
+        if (u.protocol === 'file:') {
+          const page = pageFromUrl(url);
+          if (page) navigate(page);
+          else webview.src = url;
+          return;
+        }
+        if (u.protocol === 'http:' || u.protocol === 'https:') {
+          window.shellApi?.openExternal?.(url);
+        }
+      } catch (_) { /* ignore */ }
+    }
+
+    function waitForLayout() {
+      return new Promise((resolve) => {
+        const tick = () => {
+          const rect = webview.getBoundingClientRect();
+          if (rect.width >= 10 && rect.height >= 10) resolve();
+          else requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      });
+    }
+
+    function nudgeGuest() {
+      webview.executeJavaScript(`
+        (() => {
+          window.dispatchEvent(new Event('resize'));
+          if (typeof window.__playSlide === 'function') {
+            window.__playSlide(window.__currentSlideIndex || 0);
+          }
+          document.body && document.body.classList.contains('motion-ready') &&
+            document.querySelectorAll('.slide [data-anim]').forEach((el) => {
+              const op = getComputedStyle(el).opacity;
+              if (op === '0' && !el.style.opacity) el.style.opacity = '1';
+            });
+        })();
+      `).catch(() => {});
     }
 
     buttons.forEach((btn) => {
@@ -103,14 +178,35 @@
       else webview.reload();
     });
 
-    webview.addEventListener('new-window', (e) => {
-      const url = e.url || '';
-      try {
-        if (new URL(url).hostname === 'www.zybkpro.top') {
-          webview.src = url;
-        }
-      } catch (_) { /* ignore */ }
+    webview.addEventListener('did-navigate', (e) => syncFromWebviewUrl(e.url));
+    webview.addEventListener('did-navigate-in-page', (e) => syncFromWebviewUrl(e.url));
+    webview.addEventListener('did-finish-load', () => {
+      // 首页动效/布局偶发首屏未就绪，加载完成后补一次唤醒
+      setTimeout(nudgeGuest, 50);
+      setTimeout(nudgeGuest, 400);
     });
+    webview.addEventListener('did-fail-load', (e) => {
+      if (!e || e.errorCode === -3) return; // ERR_ABORTED
+      const page = currentPage;
+      if (!PAGES[page]) return;
+      setTimeout(() => {
+        webview.setAttribute('src', PAGES[page]);
+      }, 120);
+    });
+    webview.addEventListener('new-window', (e) => {
+      e.preventDefault?.();
+      handleExternalOrLocal(e.url || '');
+    });
+
+    (async () => {
+      if (!PAGES.home) {
+        PAGES = (await window.shellApi?.getPages?.()) || PAGES;
+      }
+      await waitForLayout();
+      if (bootstrapped) return;
+      bootstrapped = true;
+      navigate('home');
+    })();
   </script>
 </body>
 </html>
